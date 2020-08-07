@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="client_id">8a16994e018b4e2495bdc78b1ba81ad1</string>
+    <string name="redirectUri">https://tfggroover.azurewebsites.net/home/callback</string>
+    <string name="refreshTokenAzureUrl">https://tfggroover.azurewebsites.net/home/auth?refresh_token=</string>
+    <string name="callbackAzureUrl">https://tfggroover.azurewebsites.net</string>
+</resources>

@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "427397483542",
+    "firebase_url": "https://groover-3b82a.firebaseio.com",
+    "project_id": "groover-3b82a",
+    "storage_bucket": "groover-3b82a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:427397483542:android:5b71793957a29bd1",
+        "android_client_info": {
+          "package_name": "com.amartindalonsoc.groover"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "427397483542-67kr3tugot2kbpmbfjtv0qt21kqd79dr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.amartindalonsoc.groover",
+            "certificate_hash": "7d56de6552129b1b44bcf31f6fd61ceb4b2737a3"
+          }
+        },
+        {
+          "client_id": "427397483542-n2rirku95tm3poq99bmckgtbg1sojqk4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAngARByFSBbP5HCN70qo5wSVutGAZ5my0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "427397483542-n2rirku95tm3poq99bmckgtbg1sojqk4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

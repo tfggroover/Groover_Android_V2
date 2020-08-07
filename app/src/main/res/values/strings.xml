@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Groover</string>
+
+    <string name="title_home">Home</string>
+    <string name="title_map">Map</string>
+    <string name="title_recommendation">Where to?</string>
+    <string name="title_profile">Profile</string>
+</resources>

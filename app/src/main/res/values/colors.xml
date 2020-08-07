@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#000000</color>
+    <color name="colorPrimaryDark">#000000</color>
+    <color name="colorAccent">#2196F3</color>
+    <color name="white">#ffffff</color>
+    <color name="black">#000000</color>
+    <color name="color_text">#495459</color>    <color name="colorNavIcon">#dae9f6</color>
+    <color name="colorNavText">#8B959D</color>
+    <color name="selected_playlist">#5CD666</color>
+    <color name="separatorView">#5D5D5D</color>
+</resources>
