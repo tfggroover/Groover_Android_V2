@@ -174,22 +174,27 @@ class RecognizerFragment: Fragment(), IACRCloudListener {
 
         val result = results.result
 
-        var res = "\n"
-        var availableInSpotify = false
-        var spotifyTrackId = ""
-        var spotifyAlbumId = ""
-
         try {
-            // TODO Faltaria comprobar que este disponible en Spotify, si no lo esta, no mostrar - Ya ha petado una vez haciendo pruebas por esto
             println(result)
             val userToken = SharedPreferencesManager.getString(Constants.spotify_user_token, recognizedFragmentContext)!!
             val resultAsJson = Gson().fromJson(result, RecognizedSong::class.java)
             val resultCode = resultAsJson.status.code
-            val recognizedSpotifyAlbumId = resultAsJson.metadata.music.first().externalMetadata.spotify.album.id
-            val recognizedSongName = resultAsJson.metadata.music.first().title
-            val recognizedSongArtist = resultAsJson.metadata.music.first().artists.first().name // TODO Hacer que itere todos los artistas para mostrar todos los nombres
 
-            if (resultCode == 0) {
+            if (resultCode == 0 && resultAsJson.metadata.music.first().externalMetadata != null && resultAsJson.metadata.music.first().externalMetadata?.spotify != null) {
+
+                val recognizedSpotifyAlbumId = resultAsJson.metadata.music.first().externalMetadata!!.spotify!!.album.id
+                val recognizedSongName = resultAsJson.metadata.music.first().title
+
+                val recognizedSongArtistList = resultAsJson.metadata.music.first().artists
+                var recognizedSongArtist = ""
+                if (recognizedSongArtistList.size > 1) {
+                    for (artist in recognizedSongArtistList) {
+                        recognizedSongArtist = recognizedSongArtist.plus(", " + artist.name)
+                    }
+                } else {
+                    recognizedSongArtist = recognizedSongArtistList.first().name
+                }
+
                 // Llamada a spotify para coger la imagen del album
                 val requestForAlbumImage = Api.spotifyApiRequest()
                 val callForAlbumImage = requestForAlbumImage.getAlbumWithId(recognizedSpotifyAlbumId, ("Bearer " + userToken))
@@ -217,112 +222,9 @@ class RecognizerFragment: Fragment(), IACRCloudListener {
             } else {
                 cancel()
             }
-
-
-
-//            var j = JSONObject(result)
-//            var j1 = j.getJSONObject("status")
-//            var j2 = j1.getInt("code")
-//
-//            if (j2 == 0){
-//                var metadata = j.getJSONObject("metadata")
-//
-//                if (metadata.has("music")){
-//                    var musics = metadata.getJSONArray("music")
-//                    for (i in 0 until musics.length()){
-//                        var tt = JSONObject(musics.get(i).toString())
-//                        var title = tt.getString("title")
-//                        var artistt = tt.getJSONArray("artists")
-//                        var art = JSONObject(artistt.get(0).toString())
-//                        var artist = art.getString("name")
-//                        res = res + (i + 1) + ". Title: " + title + "   Artist: " + artist + "\n"
-//                        if (tt.has("external_metadata")){
-//                            var met = tt.getJSONObject("external_metadata")
-//                            if (met.has("spotify")){
-//                                spotifyTrackId = met.getJSONObject("spotify").getJSONObject("track").getString("id")
-//                                spotifyAlbumId = met.getJSONObject("spotify").getJSONObject("album").getString("id")
-//                                songRecognizedName.text = title
-//                                songRecognizedArtist.text = artist
-//                                res = res + "Available in Spotify - Id: " + spotifyTrackId
-//                                availableInSpotify = true
-//
-//                                val albumRequest = object:  JsonObjectRequest(
-//                                    Request.Method.GET, "https://api.spotify.com/v1/albums/" + spotifyAlbumId, null,
-//                                    Response.Listener<JSONObject>{ jsonResponse ->
-//                                        val imageJson = JSONObject(jsonResponse.getJSONArray("images")[0].toString())
-//                                        Picasso.get().load(imageJson.getString("url")).into(songRecognizedImage)
-//                                    },
-//                                    Response.ErrorListener {error ->}){
-//
-//
-//                                    override fun getHeaders(): MutableMap<String, String> {
-//                                        val requestHeader: MutableMap<String,String> = hashMapOf()
-//                                        requestHeader.put("Accept","application/json")
-//                                        requestHeader.put("Content-Type","application/json")
-//                                        requestHeader.put("Authorization","Bearer " + storedUser.access)
-//
-//                                        return requestHeader
-//                                    }
-//                                }
-//                                MySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(albumRequest)
-//                                val textParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-//                                songRecognizedName.gravity = Gravity.CENTER
-//                                songRecognizedArtist.gravity = Gravity.CENTER
-//                                songRecognizedName.layoutParams = textParams
-//                                songRecognizedArtist.layoutParams = textParams
-//                                TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(songRecognizedName, 8, 16, 1, TypedValue.COMPLEX_UNIT_SP)
-//                                TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(songRecognizedArtist, 8, 16, 1, TypedValue.COMPLEX_UNIT_SP)
-//                                loadingAndImageParams.gravity = Gravity.CENTER
-//                                homeContentLinearLayout.removeView(loadingView)
-//                                homeContentLinearLayout.addView(songRecognizedImage)
-//                                homeContentLinearLayout.addView(songRecognizedName)
-//                                homeContentLinearLayout.addView(songRecognizedArtist)
-//
-//
-//                                // Get location and add recognized song
-//                                var currentLocation = (activity as MainActivity).getLocation()
-//                                println("Coordinates -> " + (activity as MainActivity).getLocation())
-//
-//                                db.collection("music_recognition").get().addOnSuccessListener { result ->
-//                                    for (document in result){
-//                                        val musicLocation = document.toObject(MusicLocation::class.java)
-//                                        println(musicLocation.location.toString())
-//                                        println(musicLocation.songs.toString())
-//
-//                                        if (abs(currentLocation.latitude - musicLocation.location.latitude)<0.0005 && abs(currentLocation.longitude - musicLocation.location.longitude)<0.0005){
-//                                            var music = musicLocation.songs
-//                                            if (music.containsKey(spotifyTrackId)){
-//                                                var repIncreased = music[spotifyTrackId]?.inc()
-//                                                music.set(spotifyTrackId,repIncreased)
-//                                                db.collection("music_recognition").document(document.id).update("songs",music)
-//                                            }else{
-//                                                music.set(spotifyTrackId,1)
-//                                                db.collection("music_recognition").document(document.id).update("songs",music)
-//                                            }
-//                                        }
-//
-//                                    }
-//                                }
-//
-//                                break
-//                            }
-//                        }
-//                    }
-//                    if (!availableInSpotify){
-//                        res = res + "Not available in Spotify"
-//                    }
-//                }
-//                searchSong.text = "Search"
-//                searchSong.setOnClickListener { start() }
-//                //res = res + "\n\n" + result
-//            }else{
-//                println("-----------------------------------------------------------> Not recognized, try again")
-//                cancel()
-//            }
         }catch (e: JSONException){
             e.printStackTrace()
         }
-        //songRecognized.text = res
         startTime = System.currentTimeMillis()
     }
 

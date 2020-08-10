@@ -22,7 +22,7 @@ data class RecognizedData (
     val album: RecognizedAlbum,
     val title: String,
     @SerializedName("external_metadata")
-    val externalMetadata: RecognizedExternalMetadata
+    val externalMetadata: RecognizedExternalMetadata?
 )
 
 data class RecognizedArtist (
@@ -34,7 +34,7 @@ data class RecognizedAlbum (
 )
 
 data class RecognizedExternalMetadata (
-    val spotify: RecognizedSpotify
+    val spotify: RecognizedSpotify?
 )
 
 data class RecognizedSpotify (
