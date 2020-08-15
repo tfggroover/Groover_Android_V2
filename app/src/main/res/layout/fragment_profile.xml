@@ -6,6 +6,15 @@
         android:layout_height="match_parent"
         android:layout_marginTop="?attr/actionBarSize">
 
+    <ImageView
+        android:id="@+id/profileImage"
+        android:layout_width="275dp"
+        android:layout_height="275dp"
+        android:layout_marginTop="15dp"
+        app:layout_constraintLeft_toRightOf="@id/guidelineLeft"
+        app:layout_constraintRight_toLeftOf="@id/guidelineRight"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <TextView
             android:id="@+id/profileName"
             android:layout_width="0dp"
@@ -31,14 +40,35 @@
             app:layout_constraintStart_toStartOf="@+id/guidelineLeft"
             app:layout_constraintTop_toBottomOf="@id/profileName" />
 
-    <ImageView
-            android:id="@+id/profileImage"
-            android:layout_width="275dp"
-            android:layout_height="275dp"
-            android:layout_marginTop="15dp"
-            app:layout_constraintLeft_toRightOf="@id/guidelineLeft"
-            app:layout_constraintRight_toLeftOf="@id/guidelineRight"
-            app:layout_constraintTop_toTopOf="parent" />
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toStartOf="@+id/guidelineRight"
+        app:layout_constraintStart_toStartOf="@+id/guidelineLeft"
+        app:layout_constraintTop_toBottomOf="@id/profileEmail" >
+
+
+        <SeekBar
+            android:id="@+id/profilePlaceDistanceBar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:max="5000"
+            android:layout_weight="3"
+            app:layout_constraintEnd_toStartOf="@+id/parent"
+            app:layout_constraintStart_toStartOf="@+id/profilePlaceDistanceTextView" />
+
+        <TextView
+            android:id="@+id/profilePlaceDistanceTextView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="7"
+            android:gravity="center"
+            tools:text="500m"/>
+
+    </LinearLayout>
+
+
 
     <Button
             android:id="@+id/logoutButton"

@@ -4,7 +4,11 @@ import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
+import android.util.Log
+import com.amartindalonsoc.groover.responses.Place
 import com.amartindalonsoc.groover.responses.SpotifyCallback
+import com.amartindalonsoc.groover.utils.SharedPreferencesManager.set
+import com.google.android.gms.maps.model.LatLng
 
 object SharedPreferencesManager {
 
@@ -55,6 +59,43 @@ object SharedPreferencesManager {
 //        getSharedPreferences().edit().putString(name,value).apply()
 //    }
 
+    fun getFloat(name: String, context: Context): Float? {
+        val prefs = defaultPrefs(context)
+        return prefs[name]
+    }
+
+    fun saveFloat(name: String, value: Float, context: Context) {
+        val prefs = defaultPrefs(context)
+        prefs[name] = value
+    }
+
+    fun getPlacesIds(context: Context): MutableSet<String>? {
+        val prefs = defaultPrefs(context)
+        return prefs.getStringSet("places_ids", null)
+    }
+
+    fun getMapZoom(context: Context): Float {
+        val prefs = defaultPrefs(context)
+        return prefs[Constants.map_zoom]!!
+    }
+
+    fun saveMapZoom(zoom: Float, context: Context) {
+        val prefs = defaultPrefs(context)
+        prefs[Constants.map_zoom] = zoom
+    }
+
+    fun getCameraLocation(context: Context): LatLng {
+        val latitude = getFloat(Constants.camera_location_latitude, context)!!.toDouble()
+        val longitude = getFloat(Constants.camera_location_longitude, context)!!.toDouble()
+        return LatLng(latitude,longitude)
+    }
+
+    fun saveCameraLocation(coords: LatLng, context: Context) {
+        val prefs = defaultPrefs(context)
+        prefs[Constants.camera_location_latitude] = coords.latitude.toFloat()
+        prefs[Constants.camera_location_longitude] = coords.longitude.toFloat()
+    }
+
     fun saveUserFromCallback(spotifyCallback: SpotifyCallback, context: Context) {
         val prefs = defaultPrefs(context)
         prefs[Constants.spotify_user_token] = spotifyCallback.spotify.accessToken
@@ -63,11 +104,30 @@ object SharedPreferencesManager {
         prefs[Constants.user_email] = spotifyCallback.spotifyUserData.email
         prefs[Constants.user_country] = spotifyCallback.spotifyUserData.country
         prefs[Constants.spotify_account_type] = spotifyCallback.spotifyUserData.product
+        prefs[Constants.profile_image] = spotifyCallback.spotifyUserData.images.first().url //TODO Revisar si una cuenta sin imagen peta
 
 //        saveString("firebase_token", spotifyCallback.firebase)
 //        saveString("user_name", spotifyCallback.spotifyUserData.displayName)
 //        saveString("user_email", spotifyCallback.spotifyUserData.email)
 //        saveString("user_country", spotifyCallback.spotifyUserData.country)
 //        saveString("spotify_account_type", spotifyCallback.spotifyUserData.product)
+    }
+
+    fun savePlacesFromCallback(placesCallback: List<Place>, context: Context) {
+        val prefs = defaultPrefs(context)
+        var places_ids = mutableSetOf<String>()
+
+        for (place in placesCallback) {
+            val id = place.id
+            places_ids.add(id)
+//            prefs[place.displayName] = id
+            prefs[id.plus(Constants.places_display_name)] = place.displayName
+            prefs[id.plus(Constants.places_latitude)] = place.location.latitude.toFloat()
+            prefs[id.plus(Constants.places_longitude)] = place.location.longitude.toFloat()
+            prefs[id.plus(Constants.places_address)] = place.address
+            prefs[id.plus(Constants.places_main_playlist)] = place.mainPlaylist?.id
+        }
+
+        prefs.edit().putStringSet("places_ids", places_ids).apply()
     }
 }

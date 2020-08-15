@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.amartindalonsoc.groover.R
 
-class RecognizedFragment: Fragment() {
+class RecognizedFragmentOfPlace: Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

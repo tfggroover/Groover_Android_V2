@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.amartindalonsoc.groover.R
 
-class PlaylistFragment: Fragment() {
+class PlaylistFragmentOfPlace: Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

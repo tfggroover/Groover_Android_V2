@@ -1,19 +1,19 @@
 package com.amartindalonsoc.groover.responses
 
-data class Places(
-    val results: List<Place>
-)
+//data class Places(
+//    val results: List<Place>
+//)
 
 data class Place (
     val id: String,
     val address: String,
     val displayName: String,
     val location: Location,
-    val mainPlaylist: MainPlaylist,
-    val weeklyPlaylists: WeeklyPlaylists,
+    val mainPlaylist: MainPlaylist?,
+    val weeklyPlaylists: WeeklyPlaylists?,
     val ratings: List<Rating>,
     val owners: List<User>,
-    val phone: String,
+    val phone: String?,
     val geohash: String,
     val recognizedMusic: Map<String, Long>,
     val timetables: List<Timetable>

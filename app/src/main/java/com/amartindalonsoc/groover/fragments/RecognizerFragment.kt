@@ -109,7 +109,7 @@ class RecognizerFragment: Fragment(), IACRCloudListener {
 
         mConfig.acrcloudListener = this
         mConfig.context = activity!!.applicationContext
-
+// TODO Pasar a Config
         mConfig.host = "identify-eu-west-1.acrcloud.com"
         mConfig.accessKey = "1e783c710416412e75bfe54382aee5c5"
         mConfig.accessSecret = "fiZ8wJz4lcbtFNGTIGZK3lujUZ59w7U25xggL2jr"

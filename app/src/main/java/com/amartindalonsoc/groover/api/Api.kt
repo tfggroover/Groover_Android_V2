@@ -19,10 +19,10 @@ object Api {
 
     //TODO Pasar las baseUrl al archivo de Strings
 
-    fun getSpotifyUserJSONfromCallback(): Endpoints {
-//        val interceptor = HttpLoggingInterceptor()
-//        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
-        val client = OkHttpClient.Builder()//.addInterceptor(interceptor)
+    fun azureApiRequest(): Endpoints {
+        val interceptor = HttpLoggingInterceptor()
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
+        val client = OkHttpClient.Builder().addInterceptor(interceptor)
         return Retrofit.Builder()
             .baseUrl("https://tfggroover.azurewebsites.net/")
             .client(client.build())
