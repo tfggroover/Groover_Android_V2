@@ -40,34 +40,6 @@
             app:layout_constraintStart_toStartOf="@+id/guidelineLeft"
             app:layout_constraintTop_toBottomOf="@id/profileName" />
 
-    <LinearLayout
-        android:layout_width="0dp"
-        android:layout_height="50dp"
-        android:orientation="horizontal"
-        app:layout_constraintEnd_toStartOf="@+id/guidelineRight"
-        app:layout_constraintStart_toStartOf="@+id/guidelineLeft"
-        app:layout_constraintTop_toBottomOf="@id/profileEmail" >
-
-
-        <SeekBar
-            android:id="@+id/profilePlaceDistanceBar"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:max="5000"
-            android:layout_weight="3"
-            app:layout_constraintEnd_toStartOf="@+id/parent"
-            app:layout_constraintStart_toStartOf="@+id/profilePlaceDistanceTextView" />
-
-        <TextView
-            android:id="@+id/profilePlaceDistanceTextView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="7"
-            android:gravity="center"
-            tools:text="500m"/>
-
-    </LinearLayout>
-
 
 
     <Button

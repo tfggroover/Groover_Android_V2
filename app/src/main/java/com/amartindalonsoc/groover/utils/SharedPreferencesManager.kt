@@ -141,4 +141,9 @@ object SharedPreferencesManager {
 
         prefs.edit().putStringSet("places_ids", places_ids).apply()
     }
+
+    fun logout(context: Context) {
+        val prefs = defaultPrefs(context)
+        prefs.edit().clear().apply()
+    }
 }
