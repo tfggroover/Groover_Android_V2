@@ -35,8 +35,15 @@ data class MainPlaylist (
 
 data class Song (
     val id: String,
+    val name: String,
+    val artists: List<Artist>,
     val tags: List<String>,
     val data: Map<String,String>
+)
+
+data class Artist (
+    val id: String,
+    val name: String
 )
 
 data class User (

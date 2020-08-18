@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.util.Log
 import com.amartindalonsoc.groover.R
 import com.amartindalonsoc.groover.api.Api
-import com.amartindalonsoc.groover.responses.SpotifyLoginCallback
 import com.amartindalonsoc.groover.responses.SpotifyRefresh
 import com.amartindalonsoc.groover.utils.Constants
 import com.amartindalonsoc.groover.utils.SharedPreferencesManager
@@ -45,7 +44,7 @@ class SplashScreen : AppCompatActivity() {
                 if (response.isSuccessful) {
                     if (response.body() != null) {
                         //TODO Guardar datos y mandar a getPlaces
-                        SharedPreferencesManager.saveUserFromCRefresh(response.body()!!, splashActivity)
+                        SharedPreferencesManager.saveUserFromRefresh(response.body()!!, splashActivity)
                         Log.i("newlogintest_saveddata", SharedPreferencesManager.getString(Constants.user_name, splashActivity)!!)
                         Log.i("newlogintest_saveddata", SharedPreferencesManager.getString(Constants.user_email, splashActivity)!!)
                         Utils.startMainActivity(splashActivity)

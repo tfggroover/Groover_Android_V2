@@ -1,7 +1,7 @@
 package com.amartindalonsoc.groover.ui.main
 
 import android.Manifest
-import android.app.Service
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
@@ -16,53 +16,31 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.core.widget.TextViewCompat
 import androidx.fragment.app.Fragment
-import com.acrcloud.rec.*
 import com.acrcloud.rec.ACRCloudClient
 import com.acrcloud.rec.ACRCloudConfig
 import com.acrcloud.rec.ACRCloudResult
 import com.acrcloud.rec.IACRCloudListener
 import com.amartindalonsoc.groover.R
 import com.amartindalonsoc.groover.api.Api
+import com.amartindalonsoc.groover.responses.Place
 import com.amartindalonsoc.groover.responses.RecognizedSong
+import com.amartindalonsoc.groover.responses.RecognizedSpotifyArtist
 import com.amartindalonsoc.groover.responses.SpotifyAlbumResponse
-import com.amartindalonsoc.groover.responses.SpotifyCallback
 import com.amartindalonsoc.groover.utils.Constants
 import com.amartindalonsoc.groover.utils.SharedPreferencesManager
-import com.amartindalonsoc.groover.utils.Utils
+import com.google.android.gms.maps.model.LatLng
 import com.google.gson.Gson
 import com.squareup.picasso.Picasso
-//import com.acrcloud.rec.ACRCloudClient
-//import com.acrcloud.rec.ACRCloudConfig
-//import com.acrcloud.rec.ACRCloudResult
-//import com.acrcloud.rec.IACRCloudListener
-//import com.acrcloud.rec.utils.ACRCloudLogger
-//import com.amartindalonsoc.groover.R
-//import com.amartindalonsoc.groover.ui.login.StoredUser
-//import com.android.volley.Request
-//import com.android.volley.Response
-//import com.android.volley.toolbox.JsonObjectRequest
-//import com.google.firebase.firestore.FirebaseFirestore
-//import com.spotify.protocol.types.Album
-//import com.spotify.protocol.types.Track
-//import com.squareup.moshi.Moshi
-//import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.fragment_home.*
-import kotlinx.android.synthetic.main.fragment_profile.*
-import org.json.JSONArray
 import org.json.JSONException
-import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import kotlin.math.abs
 import kotlin.math.round
 
 class RecognizerFragment: Fragment(), IACRCloudListener {
-    //lateinit var globalVars :GlobalVars
-    //lateinit var storedUser: StoredUser
     lateinit var mConfig : ACRCloudConfig
     lateinit var mClient: ACRCloudClient
     private var mProcessing = false
@@ -74,12 +52,6 @@ class RecognizerFragment: Fragment(), IACRCloudListener {
     lateinit var songRecognizedName: TextView
     lateinit var songRecognizedArtist: TextView
     lateinit var recognizedFragmentContext: Context
-//    val db = FirebaseFirestore.getInstance()
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        //globalVars  = activity!!.applicationContext as GlobalVars
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -184,15 +156,16 @@ class RecognizerFragment: Fragment(), IACRCloudListener {
 
                 val recognizedSpotifyAlbumId = resultAsJson.metadata.music.first().externalMetadata!!.spotify!!.album.id
                 val recognizedSongName = resultAsJson.metadata.music.first().title
+                val recognizedSongSpotifyId = resultAsJson.metadata.music.first().externalMetadata!!.spotify!!.track.id
+                val recognizedSongSpotifyName = resultAsJson.metadata.music.first().externalMetadata!!.spotify!!.track.name
+                val recognizedSongSpotifyArtists = resultAsJson.metadata.music.first().externalMetadata!!.spotify!!.artists
 
-                val recognizedSongArtistList = resultAsJson.metadata.music.first().artists
-                var recognizedSongArtist = ""
-                if (recognizedSongArtistList.size > 1) {
-                    for (artist in recognizedSongArtistList) {
-                        recognizedSongArtist = recognizedSongArtist.plus(", " + artist.name)
+//                val recognizedSongArtistList = resultAsJson.metadata.music.first().artists
+                var recognizedSongArtist = recognizedSongSpotifyArtists.first().name
+                if (recognizedSongSpotifyArtists.size > 1) {
+                    for (i in 1 until recognizedSongSpotifyArtists.size) {
+                        recognizedSongArtist = recognizedSongArtist.plus(", " + recognizedSongSpotifyArtists[i].name)
                     }
-                } else {
-                    recognizedSongArtist = recognizedSongArtistList.first().name
                 }
 
                 // Llamada a spotify para coger la imagen del album
@@ -209,6 +182,8 @@ class RecognizerFragment: Fragment(), IACRCloudListener {
                             if (response.body() != null) {
                                 val imageUrl = response.body()!!.images.first().url
                                 displayRecognizedSong(recognizedSongName, recognizedSongArtist, imageUrl)
+                                //TODO Llamada a nuestro back para pasarle la id de la cancion reconocida
+                                sendRecognizedSong(recognizedSongSpotifyId, recognizedSongSpotifyName, recognizedSongSpotifyArtists)
                             }
                         }
                     }
@@ -218,8 +193,8 @@ class RecognizerFragment: Fragment(), IACRCloudListener {
                     }
                 })
 
-                //TODO Llamada a nuestro back para pasarle la id de la cancion reconocida
             } else {
+                Log.i("NOT_IN_SPOTIFY","Not available on Spotify")
                 cancel()
             }
         }catch (e: JSONException){
@@ -272,6 +247,38 @@ class RecognizerFragment: Fragment(), IACRCloudListener {
     }
 
 
+    data class RecognizedSongForBack (val id: String, val name: String, val artists: List<RecognizedSpotifyArtist>)
+    fun sendRecognizedSong(id: String, name: String, artists: List<RecognizedSpotifyArtist>) {
+        val recognizedSongToSend = RecognizedSongForBack(id, name, artists)
+        val currentLocation = getLocation()
+        val request = Api.azureApiRequest()
+        val call = request.getPlaces(currentLocation.latitude,currentLocation.longitude,50.0,1,25)
+        call.enqueue(object : Callback<List<Place>> {
+
+            override fun onResponse(call: Call<List<Place>>, response: Response<List<Place>>) {
+                if (response.isSuccessful) {
+                    if (response.body() != null && response.body()!!.isNotEmpty()) {
+                        request.addRecognizedSong(response.body()!!.first().id,recognizedSongToSend).enqueue(object: Callback<Any> {
+                            override fun onFailure(call: Call<Any>, t: Throwable) {
+                                Log.i("SongNotAdded", t.message)
+                            }
+
+                            override fun onResponse(call: Call<Any>, response: Response<Any>) {
+                                Log.i("SongAdded", "Successfully added song to place")
+                            }
+                        })
+                    }
+                }
+            }
+
+            override fun onFailure(call: Call<List<Place>>, t: Throwable) {
+                Log.i("PlacesFailure", t.message)
+            }
+
+        })
+    }
+
+
     private val REQUEST_EXTERNAL_STORAGE = 1
     private val PERMISSIONS = arrayOf<String>(
         Manifest.permission.ACCESS_NETWORK_STATE,
@@ -291,6 +298,44 @@ class RecognizerFragment: Fragment(), IACRCloudListener {
                 break
             }
         }
+    }
+
+
+    // Location
+    @SuppressLint("MissingPermission")
+    fun getLocation(): LatLng {
+        val locationManager = activity!!.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        val hasGps = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+        var locationGps: Location? = null
+        if (hasGps) {
+            Log.d("CodeAndroidLocation", "hasGps")
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 0F, object :
+                LocationListener {
+                override fun onLocationChanged(location: Location?) {
+                    if (location != null) {
+                        locationGps = location
+                        Log.d("CodeAndroidLocation", " GPS Latitude : " + locationGps!!.latitude)
+                        Log.d("CodeAndroidLocation", " GPS Longitude : " + locationGps!!.longitude)
+                    }
+                }
+                override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
+                }
+                override fun onProviderEnabled(provider: String?) {
+                }
+                override fun onProviderDisabled(provider: String?) {
+                }
+            })
+
+            val localGpsLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+            if (localGpsLocation != null)
+                locationGps = localGpsLocation
+        }
+
+        if(locationGps!= null){
+            return LatLng(locationGps!!.latitude,locationGps!!.longitude)
+        }
+
+        return LatLng(0.0,0.0)
     }
 
     /////// Aux functions, move later

@@ -112,7 +112,7 @@ object SharedPreferencesManager {
 //        saveString("spotify_account_type", spotifyCallback.spotifyUserData.product)
     }
 
-    fun saveUserFromCRefresh(spotifyRefresh: SpotifyRefresh, context: Context) {
+    fun saveUserFromRefresh(spotifyRefresh: SpotifyRefresh, context: Context) {
         val prefs = defaultPrefs(context)
         prefs[Constants.spotify_user_token] = spotifyRefresh.spotify.accessToken
         prefs[Constants.firebase_token] = spotifyRefresh.firebase
