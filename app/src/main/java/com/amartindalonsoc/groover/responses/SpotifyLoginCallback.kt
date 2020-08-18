@@ -2,13 +2,13 @@ package com.amartindalonsoc.groover.responses
 
 import com.google.gson.annotations.SerializedName
 
-data class SpotifyCallback (
-    val spotify: Spotify,
+data class SpotifyLoginCallback (
+    val spotify: SpotifyLogin,
     val spotifyUserData: SpotifyUserData,
     val firebase: String
 )
 
-data class Spotify (
+data class SpotifyLogin (
     @SerializedName("refresh_token")
     val refreshToken: String,
     @SerializedName("access_token")

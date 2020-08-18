@@ -1,13 +1,11 @@
 package com.amartindalonsoc.groover.utils
 
-import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
-import android.util.Log
 import com.amartindalonsoc.groover.responses.Place
-import com.amartindalonsoc.groover.responses.SpotifyCallback
-import com.amartindalonsoc.groover.utils.SharedPreferencesManager.set
+import com.amartindalonsoc.groover.responses.SpotifyLoginCallback
+import com.amartindalonsoc.groover.responses.SpotifyRefresh
 import com.google.android.gms.maps.model.LatLng
 
 object SharedPreferencesManager {
@@ -96,21 +94,34 @@ object SharedPreferencesManager {
         prefs[Constants.camera_location_longitude] = coords.longitude.toFloat()
     }
 
-    fun saveUserFromCallback(spotifyCallback: SpotifyCallback, context: Context) {
+    fun saveUserFromCallback(spotifyLoginCallback: SpotifyLoginCallback, context: Context) {
         val prefs = defaultPrefs(context)
-        prefs[Constants.spotify_user_token] = spotifyCallback.spotify.accessToken
-        prefs[Constants.firebase_token] = spotifyCallback.firebase
-        prefs[Constants.user_name] = spotifyCallback.spotifyUserData.displayName
-        prefs[Constants.user_email] = spotifyCallback.spotifyUserData.email
-        prefs[Constants.user_country] = spotifyCallback.spotifyUserData.country
-        prefs[Constants.spotify_account_type] = spotifyCallback.spotifyUserData.product
-        prefs[Constants.profile_image] = spotifyCallback.spotifyUserData.images.first().url //TODO Revisar si una cuenta sin imagen peta
+        prefs[Constants.spotify_user_token] = spotifyLoginCallback.spotify.accessToken
+        prefs[Constants.spotify_refresh_token] = spotifyLoginCallback.spotify.refreshToken
+        prefs[Constants.firebase_token] = spotifyLoginCallback.firebase
+        prefs[Constants.user_name] = spotifyLoginCallback.spotifyUserData.displayName
+        prefs[Constants.user_email] = spotifyLoginCallback.spotifyUserData.email
+        prefs[Constants.user_country] = spotifyLoginCallback.spotifyUserData.country
+        prefs[Constants.spotify_account_type] = spotifyLoginCallback.spotifyUserData.product
+        prefs[Constants.profile_image] = spotifyLoginCallback.spotifyUserData.images.first().url //TODO Revisar si una cuenta sin imagen peta
 
 //        saveString("firebase_token", spotifyCallback.firebase)
 //        saveString("user_name", spotifyCallback.spotifyUserData.displayName)
 //        saveString("user_email", spotifyCallback.spotifyUserData.email)
 //        saveString("user_country", spotifyCallback.spotifyUserData.country)
 //        saveString("spotify_account_type", spotifyCallback.spotifyUserData.product)
+    }
+
+    fun saveUserFromCRefresh(spotifyRefresh: SpotifyRefresh, context: Context) {
+        val prefs = defaultPrefs(context)
+        prefs[Constants.spotify_user_token] = spotifyRefresh.spotify.accessToken
+        prefs[Constants.firebase_token] = spotifyRefresh.firebase
+        prefs[Constants.user_name] = spotifyRefresh.spotifyUserData.displayName
+        prefs[Constants.user_email] = spotifyRefresh.spotifyUserData.email
+        prefs[Constants.user_country] = spotifyRefresh.spotifyUserData.country
+        prefs[Constants.spotify_account_type] = spotifyRefresh.spotifyUserData.product
+        prefs[Constants.profile_image] = spotifyRefresh.spotifyUserData.images.first().url //TODO Revisar si una cuenta sin imagen peta
+
     }
 
     fun savePlacesFromCallback(placesCallback: List<Place>, context: Context) {
