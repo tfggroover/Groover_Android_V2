@@ -24,10 +24,10 @@ import com.acrcloud.rec.ACRCloudResult
 import com.acrcloud.rec.IACRCloudListener
 import com.amartindalonsoc.groover.R
 import com.amartindalonsoc.groover.api.Api
-import com.amartindalonsoc.groover.responses.Place
-import com.amartindalonsoc.groover.responses.RecognizedSong
-import com.amartindalonsoc.groover.responses.RecognizedSpotifyArtist
-import com.amartindalonsoc.groover.responses.SpotifyAlbumResponse
+import com.amartindalonsoc.groover.models.Place
+import com.amartindalonsoc.groover.models.RecognizedSong
+import com.amartindalonsoc.groover.models.RecognizedSpotifyArtist
+import com.amartindalonsoc.groover.models.SpotifyAlbumResponse
 import com.amartindalonsoc.groover.utils.Constants
 import com.amartindalonsoc.groover.utils.SharedPreferencesManager
 import com.google.android.gms.maps.model.LatLng

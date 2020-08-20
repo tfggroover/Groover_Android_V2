@@ -10,10 +10,11 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.amartindalonsoc.groover.R
 import com.amartindalonsoc.groover.api.Api
-import com.amartindalonsoc.groover.responses.Place
+import com.amartindalonsoc.groover.models.Place
 import com.amartindalonsoc.groover.ui.main.MapFragment
 import com.amartindalonsoc.groover.ui.main.ProfileFragment
 import com.amartindalonsoc.groover.ui.main.RecognizerFragment
+import com.amartindalonsoc.groover.ui.main.RecommendationFragment
 import com.amartindalonsoc.groover.utils.SharedPreferencesManager
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.android.synthetic.main.activity_main.*
@@ -41,10 +42,12 @@ class MainActivity : AppCompatActivity() {
                 R.id.navigation_map -> {
                     val fragment = MapFragment()
                     supportFragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit()
-                    false
+                    true
                 }
                 R.id.navigation_recommendation -> {
-                    false
+                    val fragment = RecommendationFragment()
+                    supportFragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit()
+                    true
                 }
                 R.id.navigation_profile -> {
                     val fragment = ProfileFragment()
@@ -121,6 +124,22 @@ class MainActivity : AppCompatActivity() {
         }
 
         return LatLng(0.0,0.0)
+    }
+
+    override fun onBackPressed() {
+        val test = supportFragmentManager.findFragmentById(R.id.fragment_container)
+        if (test is ProfileFragment) {
+            Log.i("BACK_CONTROL", "is profile")
+        }
+        if (test is MapFragment) {
+            Log.i("BACK_CONTROL", "is map")
+        }
+        if (test is RecognizerFragment) {
+            Log.i("BACK_CONTROL", "is recon")
+        }
+        if (test is RecommendationFragment) {
+            Log.i("BACK_CONTROL", "is recommendation")
+        }
     }
 
 }

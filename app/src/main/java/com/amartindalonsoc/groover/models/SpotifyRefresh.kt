@@ -1,4 +1,4 @@
-package com.amartindalonsoc.groover.responses
+package com.amartindalonsoc.groover.models
 
 import com.google.gson.annotations.SerializedName
 

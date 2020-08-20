@@ -6,7 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import com.amartindalonsoc.groover.R
 import com.amartindalonsoc.groover.api.Api
-import com.amartindalonsoc.groover.responses.SpotifyRefresh
+import com.amartindalonsoc.groover.models.SpotifyRefresh
 import com.amartindalonsoc.groover.utils.Constants
 import com.amartindalonsoc.groover.utils.SharedPreferencesManager
 import com.amartindalonsoc.groover.utils.Utils

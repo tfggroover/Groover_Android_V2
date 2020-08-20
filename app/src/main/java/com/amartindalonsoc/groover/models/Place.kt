@@ -1,4 +1,4 @@
-package com.amartindalonsoc.groover.responses
+package com.amartindalonsoc.groover.models
 
 //data class Places(
 //    val results: List<Place>
@@ -26,7 +26,8 @@ data class Location (
 
 data class MainPlaylist (
     val id: String,
-    val hash: String,
+    val imageUrl: String,
+    val name: String,
     val songs: List<Song>,
     val metrics: Any? = null, // TODO
     val snapshotVersion: String,

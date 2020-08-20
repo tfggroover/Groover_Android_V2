@@ -3,6 +3,7 @@ package com.amartindalonsoc.groover.utils
 object Constants {
     val spotify_user_token = "spotify_user_token"
     val spotify_refresh_token = "spotify_refresh_token"
+    val spotify_user_id = "spotify_user_id"
     val firebase_token = "firebase_token"
     val user_name = "user_name"
     val user_email = "user_email"
@@ -21,4 +22,6 @@ object Constants {
     val map_zoom = "map_zoom"
     val camera_location_latitude = "camera_location_latitude"
     val camera_location_longitude = "camera_location_longitude"
+
+    val short_term = "short_term"
 }

@@ -1,7 +1,5 @@
-package com.amartindalonsoc.groover.responses
+package com.amartindalonsoc.groover.models
 
-
-import com.google.gson.annotations.SerializedName
 
 data class SpotifyAlbumResponse (
     // Poner el resto de campos que devuelve el JSON si van siendo necesarios

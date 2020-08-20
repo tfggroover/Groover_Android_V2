@@ -3,9 +3,8 @@ package com.amartindalonsoc.groover.utils
 import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
-import com.amartindalonsoc.groover.responses.Place
-import com.amartindalonsoc.groover.responses.SpotifyLoginCallback
-import com.amartindalonsoc.groover.responses.SpotifyRefresh
+import com.amartindalonsoc.groover.models.SpotifyLoginCallback
+import com.amartindalonsoc.groover.models.SpotifyRefresh
 import com.google.android.gms.maps.model.LatLng
 
 object SharedPreferencesManager {
@@ -72,6 +71,11 @@ object SharedPreferencesManager {
         return prefs.getStringSet("places_ids", null)
     }
 
+    fun getPlaylistSongs(playlistId: String, context: Context): MutableSet<String>? {
+        val prefs = defaultPrefs(context)
+        return prefs.getStringSet(playlistId.plus("_songs"), null)
+    }
+
     fun getMapZoom(context: Context): Float {
         val prefs = defaultPrefs(context)
         return prefs[Constants.map_zoom]!!
@@ -98,6 +102,7 @@ object SharedPreferencesManager {
         val prefs = defaultPrefs(context)
         prefs[Constants.spotify_user_token] = spotifyLoginCallback.spotify.accessToken
         prefs[Constants.spotify_refresh_token] = spotifyLoginCallback.spotify.refreshToken
+        prefs[Constants.spotify_user_id] = spotifyLoginCallback.spotifyUserData.id
         prefs[Constants.firebase_token] = spotifyLoginCallback.firebase
         prefs[Constants.user_name] = spotifyLoginCallback.spotifyUserData.displayName
         prefs[Constants.user_email] = spotifyLoginCallback.spotifyUserData.email
@@ -105,16 +110,12 @@ object SharedPreferencesManager {
         prefs[Constants.spotify_account_type] = spotifyLoginCallback.spotifyUserData.product
         prefs[Constants.profile_image] = spotifyLoginCallback.spotifyUserData.images.first().url //TODO Revisar si una cuenta sin imagen peta
 
-//        saveString("firebase_token", spotifyCallback.firebase)
-//        saveString("user_name", spotifyCallback.spotifyUserData.displayName)
-//        saveString("user_email", spotifyCallback.spotifyUserData.email)
-//        saveString("user_country", spotifyCallback.spotifyUserData.country)
-//        saveString("spotify_account_type", spotifyCallback.spotifyUserData.product)
     }
 
     fun saveUserFromRefresh(spotifyRefresh: SpotifyRefresh, context: Context) {
         val prefs = defaultPrefs(context)
         prefs[Constants.spotify_user_token] = spotifyRefresh.spotify.accessToken
+        prefs[Constants.spotify_user_id] = spotifyRefresh.spotifyUserData.id
         prefs[Constants.firebase_token] = spotifyRefresh.firebase
         prefs[Constants.user_name] = spotifyRefresh.spotifyUserData.displayName
         prefs[Constants.user_email] = spotifyRefresh.spotifyUserData.email
@@ -124,23 +125,32 @@ object SharedPreferencesManager {
 
     }
 
-    fun savePlacesFromCallback(placesCallback: List<Place>, context: Context) {
-        val prefs = defaultPrefs(context)
-        var places_ids = mutableSetOf<String>()
-
-        for (place in placesCallback) {
-            val id = place.id
-            places_ids.add(id)
-//            prefs[place.displayName] = id
-            prefs[id.plus(Constants.places_display_name)] = place.displayName
-            prefs[id.plus(Constants.places_latitude)] = place.location.latitude.toFloat()
-            prefs[id.plus(Constants.places_longitude)] = place.location.longitude.toFloat()
-            prefs[id.plus(Constants.places_address)] = place.address
-            prefs[id.plus(Constants.places_main_playlist)] = place.mainPlaylist?.id
-        }
-
-        prefs.edit().putStringSet("places_ids", places_ids).apply()
-    }
+//    fun savePlacesFromCallback(placesCallback: List<Place>, context: Context) {
+//        val prefs = defaultPrefs(context)
+//        val places_ids = mutableSetOf<String>()
+//
+//        for (place in placesCallback) {
+//            val id = place.id
+//            val place_main_playlist_songs = mutableSetOf<String>()
+//            places_ids.add(id)
+////            prefs[place.displayName] = id
+//            prefs[id.plus(Constants.places_display_name)] = place.displayName
+//            prefs[id.plus(Constants.places_latitude)] = place.location.latitude.toFloat()
+//            prefs[id.plus(Constants.places_longitude)] = place.location.longitude.toFloat()
+//            prefs[id.plus(Constants.places_address)] = place.address
+//            prefs[id.plus(Constants.places_main_playlist)] = place.mainPlaylist?.id
+//
+//            if (place.mainPlaylist != null) {
+//                for (song in place.mainPlaylist?.songs!!) { // TODO Revisar en que casos puede petar
+//                    place_main_playlist_songs.add(song.id)
+//                }
+//
+//                prefs.edit().putStringSet(place.mainPlaylist.id.plus("_songs"), place_main_playlist_songs).apply()
+//            }
+//        }
+//
+//        prefs.edit().putStringSet("places_ids", places_ids).apply()
+//    }
 
     fun logout(context: Context) {
         val prefs = defaultPrefs(context)

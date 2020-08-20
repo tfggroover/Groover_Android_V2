@@ -3,11 +3,7 @@ package com.amartindalonsoc.groover.ui.main
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Context.LOCATION_SERVICE
 import android.content.pm.PackageManager
-import android.location.Location
-import android.location.LocationListener
-import android.location.LocationManager
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -17,19 +13,18 @@ import android.widget.Button
 import android.widget.LinearLayout
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.amartindalonsoc.groover.R
+import com.amartindalonsoc.groover.activities.MainActivity
 import com.amartindalonsoc.groover.api.Api
 import com.amartindalonsoc.groover.fragments.PlaylistTypeInPlacePagerAdapter
-import com.amartindalonsoc.groover.responses.Place
+import com.amartindalonsoc.groover.models.Place
+import com.amartindalonsoc.groover.models.Song
 import com.amartindalonsoc.groover.utils.Constants
+import com.amartindalonsoc.groover.utils.MainPlaylistAdapter
 import com.amartindalonsoc.groover.utils.SharedPreferencesManager
-import com.amartindalonsoc.groover.utils.Utils
 import com.google.android.gms.maps.CameraUpdateFactory
-//import com.amartindalonsoc.groover.ui.login.StoredUser
-//import com.android.volley.Request
-//import com.android.volley.Response
-//import com.android.volley.toolbox.JsonObjectRequest
-//import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
@@ -38,9 +33,12 @@ import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.bottom_sheet.*
 import kotlinx.android.synthetic.main.bottom_sheet.view.*
 import kotlinx.android.synthetic.main.fragment_map.*
+import kotlinx.android.synthetic.main.playlist_fragment.*
+import kotlinx.android.synthetic.main.recognized_fragment.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -49,26 +47,16 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
 
-//import com.google.android.gms.maps.SupportMapFragment
-//import com.google.android.gms.maps.model.LatLng
-//import com.google.android.gms.maps.model.MapStyleOptions
-//import com.google.android.gms.maps.model.Marker
-//import com.google.android.gms.maps.model.MarkerOptions
-//import com.google.android.material.bottomsheet.BottomSheetBehavior
-//import com.spotify.protocol.types.Track
-//import com.squareup.moshi.Moshi
-//import com.squareup.picasso.Picasso
-//import kotlinx.android.synthetic.main.activity_main.*
-//import kotlinx.android.synthetic.main.bottom_sheet.*
-//import kotlinx.android.synthetic.main.bottom_sheet.view.*
-//import kotlinx.android.synthetic.main.recognized_fragment.*
-//import kotlinx.android.synthetic.main.playlist_fragment.*
-
 
 class MapFragment: Fragment(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
     private lateinit var sheetBehavior : BottomSheetBehavior<LinearLayout>
+    private lateinit var mainPlaylistLinearLayoutManager: LinearLayoutManager
+    private lateinit var mainPlaylistAdapter: MainPlaylistAdapter
+    private lateinit var recognizedSongsLinearLayoutManager: LinearLayoutManager
+    private lateinit var recognizedSongsAdapter: MainPlaylistAdapter
+
     lateinit var mapFragmentContext: Context
     lateinit var centerCoords: LatLng
     var distance = 4900.0
@@ -89,7 +77,6 @@ class MapFragment: Fragment(), OnMapReadyCallback {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mapFragmentContext = activity!!.applicationContext
-//        GlobalVars.currentFragment = "map"
 
         val fragmentAdapter = PlaylistTypeInPlacePagerAdapter(childFragmentManager)
         viewpager_main.adapter = fragmentAdapter
@@ -97,8 +84,6 @@ class MapFragment: Fragment(), OnMapReadyCallback {
 
          val mapFragment = childFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment
          mapFragment?.getMapAsync(this)
-
-//        toolbarToChange.title = "Groover"
 
         sheetBehavior = BottomSheetBehavior.from<LinearLayout>(bottom_sheet)
         sheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
@@ -140,6 +125,12 @@ class MapFragment: Fragment(), OnMapReadyCallback {
         searchAreaButton.setOnClickListener {
             getPlaces()
         }
+
+
+        mainPlaylistLinearLayoutManager = LinearLayoutManager(mapFragmentContext)
+        main_playlist_recycler_view.layoutManager = mainPlaylistLinearLayoutManager
+        recognizedSongsLinearLayoutManager = LinearLayoutManager(mapFragmentContext)
+        recognized_songs_recycler_view.layoutManager = recognizedSongsLinearLayoutManager
     }
 
     private val camerChangeListener = object: GoogleMap.OnCameraIdleListener {
@@ -170,29 +161,40 @@ class MapFragment: Fragment(), OnMapReadyCallback {
                 return true
             }
 
-            val placeId = marker!!.tag as String
-            val address = SharedPreferencesManager.getString(placeId.plus(Constants.places_address), mapFragmentContext)
-            bottom_sheet.bar_address.text = address
+            val emptyList = listOf<Song>()
+            Log.i("CHILD_COUNT", main_playlist_recycler_view.childCount.toString())
+
+//            if (main_playlist_recycler_view.childCount > 0) {
+//                mainPlaylistAdapter = MainPlaylistAdapter(emptyList)
+//                main_playlist_recycler_view.adapter = mainPlaylistAdapter
+//            }
 
 
-//            val debug2 = GlobalVars.places
-//            val place: Place = GlobalVars.places.getValue(marker!!.title)
-//            expanded = false
-//            bottom_sheet.bar_name.text = place.displayname
-//            bottom_sheet.bar_name.isSelected = true
-//            bottom_sheet.rating.text = place.rating.toString()
-//            bottom_sheet.ratingBar.rating = place.rating.toFloat()
-//            bottom_sheet.bar_address.text = place.address
-//            bottom_sheet.bar_phone.text = place.phone
-//            if (playlistContent != null){
-//                playlistContent.removeAllViews()
-//            }
-//            if (recognizedContent != null){
-//                recognizedContent.removeAllViews()
-//            }
-//            val calendar = Calendar.getInstance()
-//            val today = calendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, Locale.getDefault()).toLowerCase()
-//            bottom_sheet.bar_open.text = getString(R.string.open_today, timetableDayText(place,today))
+            val place = marker!!.tag as Place
+            if (place.mainPlaylist != null) {
+                bottom_sheet.playlistName.text = place.mainPlaylist.name
+                mainPlaylistAdapter = MainPlaylistAdapter(place.mainPlaylist.songs)
+                main_playlist_recycler_view.adapter = mainPlaylistAdapter
+                if(place.mainPlaylist.imageUrl != ""){
+                    Picasso.get().load(place.mainPlaylist.imageUrl).into(bottom_sheet.playlistImage)
+                } else {
+                    bottom_sheet.playlistImage.setImageResource(R.drawable.ic_profile_dark_foreground)
+                }
+            } else { //TODO Revisar que con este metodo, cuando se pasa de una place con canciones a otra con canciones, no se vayan sumando las playlists
+                bottom_sheet.playlistName.text = ""
+                mainPlaylistAdapter = MainPlaylistAdapter(emptyList)
+                main_playlist_recycler_view.adapter = mainPlaylistAdapter
+                bottom_sheet.playlistImage.setImageResource(R.drawable.ic_profile_dark_foreground)
+            }
+            if (place.recognizedMusic != null) {
+                // Comprobar que esto sea correcto
+                recognizedSongsAdapter = MainPlaylistAdapter(listOf()) // TODO Cambiar el listOf() por la lista real de canciones, si no son Songs, voy a tener que crear otro adapter
+                recognized_songs_recycler_view.adapter = recognizedSongsAdapter
+            }
+
+            // TODO Meterle lo mismo al recognizedAdapter, ver si se puede reutilizar el de MainPlaylist, porque en teoria las canciones contienen lo mismo exactamente
+            setRecyclerViewScrollListener()
+
 
             // TODO Cambiar el string del horario de forma que pueda ser traducido a diferentes idiomas
 
@@ -201,8 +203,10 @@ class MapFragment: Fragment(), OnMapReadyCallback {
 //            }
 
             sheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-            val barName = bottom_sheet.bar_name
-            barName.text = marker?.title
+            bottom_sheet.bar_name.text = marker.title
+            bottom_sheet.bar_address.text = place.address
+            bottom_sheet.bar_phone.text = place.phone
+
             selectedMarker = marker
             // Return false to indicate that we have not consumed the event and that
             // we wish for the default behavior to occur.
@@ -290,43 +294,7 @@ class MapFragment: Fragment(), OnMapReadyCallback {
     }
 
 
-    // Location
-    @SuppressLint("MissingPermission")
-    fun getLocation(): LatLng {
-        val locationManager = mapFragmentContext.getSystemService(LOCATION_SERVICE) as LocationManager
-        val hasGps = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
-        var locationGps: Location? = null
-        if (hasGps) {
-            Log.d("CodeAndroidLocation", "hasGps")
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 0F, object :
-                LocationListener {
-                override fun onLocationChanged(location: Location?) {
-                    if (location != null) {
-                        locationGps = location
-                        Log.d("CodeAndroidLocation", " GPS Latitude : " + locationGps!!.latitude)
-                        Log.d("CodeAndroidLocation", " GPS Longitude : " + locationGps!!.longitude)
-                    }
-                }
-                override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
-                }
-                override fun onProviderEnabled(provider: String?) {
-                }
-                override fun onProviderDisabled(provider: String?) {
-                }
-            })
-
-            val localGpsLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-            if (localGpsLocation != null)
-                locationGps = localGpsLocation
-        }
-
-        if(locationGps!= null){
-            return LatLng(locationGps!!.latitude,locationGps!!.longitude)
-        }
-
-        return LatLng(0.0,0.0)
-    }
-    fun getPlaces() { // TODO Volver a pedir las places en profile si se modifica la distancia, mirar como hacer para descargar todo lo que esté en la misma ciudad y luego mostrar simplemente en función de la distancia
+    fun getPlaces() {
         val request = Api.azureApiRequest()
         val call = request.getPlaces(centerCoords.latitude,centerCoords.longitude,distance,1,25)
         call.enqueue(object : Callback<List<Place>> {
@@ -336,19 +304,7 @@ class MapFragment: Fragment(), OnMapReadyCallback {
                 Log.i("getPlaces",response.body().toString())
                 if (response.isSuccessful) {
                     if (response.body() != null) {
-                        //TODO Guardar datos y mandar a MainActivity
-                        SharedPreferencesManager.savePlacesFromCallback(response.body()!!, mapFragmentContext)
-
-//                        val places_ids = SharedPreferencesManager.getPlacesIds(loginActivity)
-//                        if (places_ids != null) {
-//                            for (placeId in places_ids) {
-//                                Log.i("getPlaces_saveddata", placeId)
-//                                Log.i("getPlaces_saveddata", SharedPreferencesManager.getString(placeId.plus(Constants.places_display_name), loginActivity)!!)
-//                                Log.i("getPlaces_saveddata", SharedPreferencesManager.getFloat(placeId.plus(Constants.places_latitude), loginActivity)!!.toString())
-//                                Log.i("getPlaces_saveddata", SharedPreferencesManager.getFloat(placeId.plus(Constants.places_longitude), loginActivity)!!.toString())
-//                            }
-//                        }
-//
+                        (activity as MainActivity).placesList = response.body()!!
                         mMap.clear()
                         showPlaces()
                         searchAreaButton.visibility = Button.INVISIBLE
@@ -364,18 +320,11 @@ class MapFragment: Fragment(), OnMapReadyCallback {
     }
 
     fun showPlaces() {
-        val placesIds = SharedPreferencesManager.getPlacesIds(mapFragmentContext)
-        if (placesIds != null) {
-            for (place in placesIds) {
-                val displayName = SharedPreferencesManager.getString(place.plus(Constants.places_display_name), mapFragmentContext)
-                val latitude = SharedPreferencesManager.getFloat(place.plus(Constants.places_latitude), mapFragmentContext)
-                val longitude = SharedPreferencesManager.getFloat(place.plus(Constants.places_longitude), mapFragmentContext)
-
-                val marker = mMap.addMarker(
-                    MarkerOptions().position(LatLng(latitude!!.toDouble(),longitude!!.toDouble())).title(displayName)
-                )
-                marker.tag = place
-            }
+        for (place in (activity as MainActivity).placesList) {
+            val marker = mMap.addMarker(
+                MarkerOptions().position(LatLng(place.location.latitude,place.location.longitude)).title(place.displayName)
+            )
+            marker.tag = place
         }
     }
 
@@ -396,4 +345,19 @@ class MapFragment: Fragment(), OnMapReadyCallback {
     private fun degreesToRadians(deg: Double): Double {
         return deg * (Math.PI / 180)
     }
+
+    //TODO Revisar si esto se utiliza bien y quitar codigo sobrante
+    private val lastVisibleItemPosition: Int
+        get() = mainPlaylistLinearLayoutManager.findLastVisibleItemPosition()
+
+    private fun setRecyclerViewScrollListener() {
+        main_playlist_recycler_view.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                val totalItemCount = recyclerView.layoutManager!!.itemCount
+            }
+        })
+    }
+
 }
+

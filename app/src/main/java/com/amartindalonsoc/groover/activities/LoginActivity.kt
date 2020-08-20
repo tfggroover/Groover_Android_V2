@@ -11,7 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.amartindalonsoc.groover.R
 import com.amartindalonsoc.groover.api.Api
-import com.amartindalonsoc.groover.responses.SpotifyLoginCallback
+import com.amartindalonsoc.groover.models.SpotifyLoginCallback
 import com.amartindalonsoc.groover.utils.Constants
 import com.amartindalonsoc.groover.utils.SharedPreferencesManager
 import com.amartindalonsoc.groover.utils.Utils
