@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.amartindalonsoc.groover.R
+import com.amartindalonsoc.groover.activities.MainActivity
 import com.amartindalonsoc.groover.api.Api
 import com.amartindalonsoc.groover.models.ItemForRecommendation
 import com.amartindalonsoc.groover.models.SpotifyTopTracksResponse
@@ -62,204 +63,6 @@ class RecommendationFragment: Fragment() {
 
 
 
-//
-//        createTopTracksLayout() //Creates the top 50 tracks layout
-//
-//        if (GlobalVars.playlistsArray != null) {
-//            for(i in 0 until (GlobalVars.playlistsArray!!.length())){
-//                val playlistJSON = JSONObject(GlobalVars.playlistsArray!![i].toString())
-//                val playlistName = playlistJSON.get("name").toString()
-//                val playlistId = playlistJSON.get("id").toString()
-//
-//                if (playlistName != ""){
-//
-//                    val playlistFullLayout = LinearLayout(context)
-//                    val playlistFullLayoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-//                    playlistFullLayoutParams.setMargins(0,0,0,dpToPx(5))
-//                    playlistFullLayout.layoutParams = playlistFullLayoutParams
-//                    playlistFullLayout.orientation = LinearLayout.VERTICAL
-//
-//                    val playlistInfoLayout = LinearLayout(context)
-//                    val playlistInfoLayoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dpToPx(40))
-//                    playlistInfoLayoutParams.setMargins(0,0,0,dpToPx(2))
-//                    playlistInfoLayout.layoutParams = playlistInfoLayoutParams
-//
-//                    val playlistImageView = ImageView(context)
-//                    val playlistImageViewParams = LinearLayout.LayoutParams(dpToPx(40),dpToPx(40))
-//                    playlistImageView.layoutParams = playlistImageViewParams
-//                    if (playlistJSON.getJSONArray("images").length() > 0){
-//                        Picasso.get().load(
-//                            JSONObject(playlistJSON.getJSONArray("images")[0].toString()).get(
-//                                "url"
-//                            ).toString()
-//                        ).into(playlistImageView)
-//                    }else{
-//                        playlistImageView.setImageResource(R.drawable.no_image_playlist)
-//                    }
-//
-//
-//                    val playlistTextView = TextView(context)
-//                    val playlistTextViewParams = LinearLayout.LayoutParams(dpToPx(250), LinearLayout.LayoutParams.MATCH_PARENT, 2f)
-//                    playlistTextViewParams.setMargins(dpToPx(5),0,0,0)
-//                    playlistTextView.layoutParams = playlistTextViewParams
-//                    playlistTextView.ellipsize = TextUtils.TruncateAt.MARQUEE
-//                    playlistTextView.marqueeRepeatLimit = -1
-//                    playlistTextView.setSingleLine(true)
-//                    playlistTextView.isSelected = true
-//                    playlistTextView.gravity = Gravity.CENTER_VERTICAL
-//                    playlistTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP,20f)
-//                    playlistTextView.text = playlistName
-//                    playlistTextView.setOnClickListener {
-//                        selectPlaylist(playlistInfoLayout, playlistName, playlistId)
-//                    }
-//
-//                    val emptyView = View(context)
-//                    emptyView.layoutParams = LinearLayout.LayoutParams(0,0,1f)
-//
-//                    val expandButton = ImageView(context)
-//                    val expandButtonParams = LinearLayout.LayoutParams(dpToPx(40),dpToPx(40))
-//                    expandButtonParams.setMargins(dpToPx(5),0,0,0)
-//                    expandButton.layoutParams = expandButtonParams
-//                    expandButton.setImageResource(R.drawable.ic_expand_more)
-//
-//                    expandButton.setOnClickListener {
-//                        expandSetOnClickListener(expandButton, playlistFullLayout, playlistId)
-//                    }
-//
-//                    val playButton = ImageView(context)
-//                    val playButtonParams = LinearLayout.LayoutParams(dpToPx(40),dpToPx(40))
-//                    playButton.layoutParams = playButtonParams
-//
-//                    if (StoredUser.spotifyUser.product == "premium" && GlobalVars.spotifyInstalled){
-//                        playButton.setImageResource(R.drawable.ic_play_foreground)
-//                        playButton.setOnClickListener {
-//                            GlobalVars.mSpotifyAppRemote.connectApi.connectSwitchToLocalDevice()
-//                            GlobalVars.mSpotifyAppRemote.playerApi.play("spotify:playlist:" + playlistId)
-//                        }
-//                    }
-//
-//                    playlistInfoLayout.addView(playlistImageView)
-//                    playlistInfoLayout.addView(playlistTextView)
-//                    playlistInfoLayout.addView(emptyView)
-//                    playlistInfoLayout.addView(playButton)
-//                    playlistInfoLayout.addView(expandButton)
-//
-//                    playlistFullLayout.addView(playlistInfoLayout)
-//
-//                    playlists_listed.addView(playlistFullLayout)
-//                }
-//            }
-//        }
-//
-//
-////        val playlistsRequest = object:  JsonObjectRequest(
-////            Request.Method.GET, "https://api.spotify.com/v1/me/playlists?limit=50", null,
-////            Response.Listener<JSONObject>{ jsonResponse ->
-////                val playlistsArray = jsonResponse.getJSONArray("items")
-////                for(i in 0 until (playlistsArray.length())){
-////                    val playlistJSON = JSONObject(playlistsArray[i].toString())
-////                    val playlistName = playlistJSON.get("name").toString()
-////                    val playlistId = playlistJSON.get("id").toString()
-////
-////                    if (playlistName != ""){
-////
-////                        val playlistFullLayout = LinearLayout(context)
-////                        val playlistFullLayoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-////                        playlistFullLayoutParams.setMargins(0,0,0,dpToPx(5))
-////                        playlistFullLayout.layoutParams = playlistFullLayoutParams
-////                        playlistFullLayout.orientation = LinearLayout.VERTICAL
-////
-////                        val playlistInfoLayout = LinearLayout(context)
-////                        val playlistInfoLayoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dpToPx(40))
-////                        playlistInfoLayoutParams.setMargins(0,0,0,dpToPx(2))
-////                        playlistInfoLayout.layoutParams = playlistInfoLayoutParams
-////
-////                        val playlistImageView = ImageView(context)
-////                        val playlistImageViewParams = LinearLayout.LayoutParams(dpToPx(40),dpToPx(40))
-////                        playlistImageView.layoutParams = playlistImageViewParams
-////                        if (playlistJSON.getJSONArray("images").length() > 0){
-////                            Picasso.get().load(
-////                                JSONObject(playlistJSON.getJSONArray("images")[0].toString()).get(
-////                                    "url"
-////                                ).toString()
-////                            ).into(playlistImageView)
-////                        }else{
-////                            playlistImageView.setImageResource(R.drawable.no_image_playlist)
-////                        }
-////
-////
-////                        val playlistTextView = TextView(context)
-////                        val playlistTextViewParams = LinearLayout.LayoutParams(dpToPx(250), LinearLayout.LayoutParams.MATCH_PARENT, 2f)
-////                        playlistTextViewParams.setMargins(dpToPx(5),0,0,0)
-////                        playlistTextView.layoutParams = playlistTextViewParams
-////                        playlistTextView.ellipsize = TextUtils.TruncateAt.MARQUEE
-////                        playlistTextView.marqueeRepeatLimit = -1
-////                        playlistTextView.setSingleLine(true)
-////                        playlistTextView.isSelected = true
-////                        playlistTextView.gravity = Gravity.CENTER_VERTICAL
-////                        playlistTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP,20f)
-////                        playlistTextView.text = playlistName
-////                        playlistTextView.setOnClickListener {
-////                            selectPlaylist(playlistInfoLayout, playlistName, playlistId)
-////                        }
-////
-////                        val emptyView = View(context)
-////                        emptyView.layoutParams = LinearLayout.LayoutParams(0,0,1f)
-////
-////                        val expandButton = ImageView(context)
-////                        val expandButtonParams = LinearLayout.LayoutParams(dpToPx(40),dpToPx(40))
-////                        expandButtonParams.setMargins(dpToPx(5),0,0,0)
-////                        expandButton.layoutParams = expandButtonParams
-////                        expandButton.setImageResource(R.drawable.ic_expand_more)
-////
-////                        expandButton.setOnClickListener {
-////                            expandSetOnClickListener(expandButton, playlistFullLayout, playlistId)
-////                        }
-////
-////                        val playButton = ImageView(context)
-////                        val playButtonParams = LinearLayout.LayoutParams(dpToPx(40),dpToPx(40))
-////                        playButton.layoutParams = playButtonParams
-////
-////                        if (StoredUser.spotifyUser.product == "premium" && GlobalVars.spotifyInstalled){
-////                            playButton.setImageResource(R.drawable.ic_play_foreground)
-////                            playButton.setOnClickListener {
-////                                GlobalVars.mSpotifyAppRemote.connectApi.connectSwitchToLocalDevice()
-////                                GlobalVars.mSpotifyAppRemote.playerApi.play("spotify:playlist:" + playlistId)
-////                            }
-////                        }
-////
-////                        playlistInfoLayout.addView(playlistImageView)
-////                        playlistInfoLayout.addView(playlistTextView)
-////                        playlistInfoLayout.addView(emptyView)
-////                        playlistInfoLayout.addView(playButton)
-////                        playlistInfoLayout.addView(expandButton)
-////
-////                        playlistFullLayout.addView(playlistInfoLayout)
-////
-////                        playlists_listed.addView(playlistFullLayout)
-////                    }
-////                }
-////
-////            },
-////            Response.ErrorListener { error ->}){
-////
-////            override fun getHeaders(): MutableMap<String, String> {
-////                val requestHeader: MutableMap<String,String> = hashMapOf()
-////                requestHeader.put("Accept","application/json")
-////                requestHeader.put("Content-Type","application/json")
-////                requestHeader.put("Authorization","Bearer " + StoredUser.access)
-////
-////                return requestHeader
-////            }
-////        }
-////        MySingleton.getInstance(activity!!.applicationContext).addToRequestQueue(playlistsRequest)
-//
-//        getRecommendationButton.setOnClickListener {
-//            //TODO Sustituir este Toast por hacer la recomendacion
-//            Toast.makeText(activity!!.applicationContext, "Ir a recomendacion", Toast.LENGTH_SHORT).show()
-//            getVectors()
-//        }
-//
     }
 
     fun getTopTracks(itemForRecommendation: MutableList<ItemForRecommendation>) {
@@ -300,7 +103,7 @@ class RecommendationFragment: Fragment() {
                         itemForRecommendation.add(item)
                     }
 
-                    userPlaylistsAdapter = UserPlaylistsAdapter(itemForRecommendation)
+                    userPlaylistsAdapter = UserPlaylistsAdapter(itemForRecommendation, (activity as MainActivity))
                     user_playlists_recycler_view.adapter = userPlaylistsAdapter
 //                    setRecyclerViewScrollListener()
                 }

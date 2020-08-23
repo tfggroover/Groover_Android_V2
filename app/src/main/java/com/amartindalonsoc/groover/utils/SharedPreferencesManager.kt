@@ -98,6 +98,15 @@ object SharedPreferencesManager {
         prefs[Constants.camera_location_longitude] = coords.longitude.toFloat()
     }
 
+    fun getFirebaseBearer(context: Context): String? {
+        return getString(Constants.firebase_bearer, context)
+    }
+
+    fun saveFirebaseBearer(firebaseBearer: String, context: Context) {
+        val prefs = defaultPrefs(context)
+        prefs[Constants.firebase_bearer] = firebaseBearer
+    }
+
     fun saveUserFromCallback(spotifyLoginCallback: SpotifyLoginCallback, context: Context) {
         val prefs = defaultPrefs(context)
         prefs[Constants.spotify_user_token] = spotifyLoginCallback.spotify.accessToken

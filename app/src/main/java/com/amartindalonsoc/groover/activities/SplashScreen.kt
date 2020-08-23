@@ -10,15 +10,20 @@ import com.amartindalonsoc.groover.models.SpotifyRefresh
 import com.amartindalonsoc.groover.utils.Constants
 import com.amartindalonsoc.groover.utils.SharedPreferencesManager
 import com.amartindalonsoc.groover.utils.Utils
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 class SplashScreen : AppCompatActivity() {
+    private lateinit var auth: FirebaseAuth
     val splashActivity: Activity = this
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.splash_screen)
+        auth = Firebase.auth
 //        Thread.sleep(2000) // Temporal, se pasa al login despues de cargar los datos necesarios
 
         val refresh_token = SharedPreferencesManager.getString(Constants.spotify_refresh_token,splashActivity)
@@ -47,7 +52,8 @@ class SplashScreen : AppCompatActivity() {
                         SharedPreferencesManager.saveUserFromRefresh(response.body()!!, splashActivity)
                         Log.i("newlogintest_saveddata", SharedPreferencesManager.getString(Constants.user_name, splashActivity)!!)
                         Log.i("newlogintest_saveddata", SharedPreferencesManager.getString(Constants.user_email, splashActivity)!!)
-                        Utils.startMainActivity(splashActivity)
+
+                        firebaseLogin()
                     }
                 }
             }
@@ -64,6 +70,26 @@ class SplashScreen : AppCompatActivity() {
             }
 
         })
+    }
+
+    fun firebaseLogin() {
+        auth.signInWithCustomToken(SharedPreferencesManager.getString(Constants.firebase_token, this)!!).addOnCompleteListener {
+            if (it.isSuccessful) {
+                auth.currentUser!!.getIdToken(true).addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        if (task.result != null && task.result!!.token != null) {
+                            Log.i("BEARER", "_" + task.result!!.token!!)
+                            SharedPreferencesManager.saveFirebaseBearer(task.result!!.token!!, this)
+                            Utils.startMainActivity(splashActivity)
+                        }
+                    } else {
+                        Log.i("BEARER", it.result.toString())
+                    }
+                }
+            } else {
+                Log.i("BEARER", it.result.toString())
+            }
+        }
     }
 
 }

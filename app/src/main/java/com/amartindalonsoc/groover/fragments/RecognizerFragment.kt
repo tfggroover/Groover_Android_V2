@@ -258,7 +258,9 @@ class RecognizerFragment: Fragment(), IACRCloudListener {
             override fun onResponse(call: Call<List<Place>>, response: Response<List<Place>>) {
                 if (response.isSuccessful) {
                     if (response.body() != null && response.body()!!.isNotEmpty()) {
-                        request.addRecognizedSong(response.body()!!.first().id,recognizedSongToSend).enqueue(object: Callback<Any> {
+                        val firebaseBearer = SharedPreferencesManager.getFirebaseBearer(recognizedFragmentContext)
+                        Log.i("BEARER", firebaseBearer)
+                        request.addRecognizedSong(response.body()!!.first().id, ("Bearer " + firebaseBearer),recognizedSongToSend).enqueue(object: Callback<Any> {
                             override fun onFailure(call: Call<Any>, t: Throwable) {
                                 Log.i("SongNotAdded", t.message)
                             }

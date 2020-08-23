@@ -1,10 +1,8 @@
 package com.amartindalonsoc.groover.models
 
-//data class Places(
-//    val results: List<Place>
-//)
 
 data class Place (
+    val similitude: Double?,
     val id: String,
     val address: String,
     val displayName: String,
@@ -15,7 +13,7 @@ data class Place (
     val owners: List<User>,
     val phone: String?,
     val geohash: String,
-    val recognizedMusic: Map<String, Long>,
+    val recognizedMusic: List<RecognizedSongFromBack>?,
     val timetables: List<Timetable>
 )
 
@@ -32,6 +30,13 @@ data class MainPlaylist (
     val metrics: Any? = null, // TODO
     val snapshotVersion: String,
     val url: String
+)
+
+data class RecognizedSongFromBack(
+    val count: Int,
+    val id: String,
+    val name: String,
+    val artists: List<Artist>
 )
 
 data class Song (

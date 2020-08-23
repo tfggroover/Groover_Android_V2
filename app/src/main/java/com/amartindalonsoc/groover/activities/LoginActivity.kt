@@ -15,6 +15,9 @@ import com.amartindalonsoc.groover.models.SpotifyLoginCallback
 import com.amartindalonsoc.groover.utils.Constants
 import com.amartindalonsoc.groover.utils.SharedPreferencesManager
 import com.amartindalonsoc.groover.utils.Utils
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
@@ -25,6 +28,7 @@ import retrofit2.Response
 import java.util.*
 
 class LoginActivity : AppCompatActivity() {
+    private lateinit var auth: FirebaseAuth
     private val stateRandom = UUID.randomUUID().toString()
     private val request_code_original = 1234 // Revisar a ver si esto tiene que ir cambiando
     val loginActivity: Activity = this
@@ -33,6 +37,7 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.login_activity)
         verifyPermissions()
+        auth = Firebase.auth
 
         val loginButton = findViewById<Button>(R.id.login_button)
         loginButton.setOnClickListener {
@@ -76,7 +81,8 @@ class LoginActivity : AppCompatActivity() {
                         Log.i("newlogintest_saveddata", SharedPreferencesManager.getString(Constants.user_name, loginActivity)!!)
                         Log.i("newlogintest_saveddata", SharedPreferencesManager.getString(Constants.user_email, loginActivity)!!)
 //                        getPlaces()
-                        Utils.startMainActivity(loginActivity)
+                        firebaseLogin()
+
                     }
                 }
             }
@@ -91,6 +97,26 @@ class LoginActivity : AppCompatActivity() {
             }
 
         })
+    }
+
+    fun firebaseLogin() {
+        auth.signInWithCustomToken(SharedPreferencesManager.getString(Constants.firebase_token, this)!!).addOnCompleteListener {
+            if (it.isSuccessful) {
+                auth.currentUser!!.getIdToken(true).addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        if (task.result != null && task.result!!.token != null) {
+                            Log.i("BEARER", "_" + task.result!!.token!!)
+                            SharedPreferencesManager.saveFirebaseBearer(task.result!!.token!!, this)
+                            Utils.startMainActivity(loginActivity)
+                        }
+                    } else {
+                        Log.i("BEARER", it.result.toString())
+                    }
+                }
+            } else {
+                Log.i("BEARER", it.result.toString())
+            }
+        }
     }
 
 //    fun getPlaces() {

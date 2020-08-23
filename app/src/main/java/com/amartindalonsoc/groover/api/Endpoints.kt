@@ -18,7 +18,13 @@ interface Endpoints {
 
     @Headers("accept: */*", "Content-type: application/json")
     @POST("/api/place/{establishmentId}/song")
-    fun addRecognizedSong(@Path("establishmentId") establishmentId: String, @Body song: RecognizerFragment.RecognizedSongForBack): Call<Any>
+    fun addRecognizedSong(@Path("establishmentId") establishmentId: String, @Header("Authorization") token: String, @Body song: RecognizerFragment.RecognizedSongForBack): Call<Any>
+
+    @GET("/api/place/recommended")
+    fun getRecommendation(@Query("playlistId") playlistId: String, @Query("lat") lat: Double, @Query("lon") lon: Double, @Query("distance") distance: Double, @Query("spoToken") token: String, @Query("page") page: Int, @Query("pageSize") pageSize: Int): Call<List<Place>>
+
+    @GET("/api/place/recommended/top")
+    fun getRecommendationTop(@Query("lat") lat: Double, @Query("lon") lon: Double, @Query("distance") distance: Double, @Query("spoToken") token: String, @Query("page") page: Int, @Query("pageSize") pageSize: Int): Call<List<Place>>
 
 
 

@@ -10,6 +10,7 @@ object Constants {
     val user_country = "user_country"
     val spotify_account_type = "spotify_account_type"
     val profile_image = "profile_image"
+    val firebase_bearer = "firebase_bearer"
 
     val map_distance_to_corner = "map_distance_to_corner"
 

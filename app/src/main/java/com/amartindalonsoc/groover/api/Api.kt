@@ -10,6 +10,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
 
 object Api {
     lateinit var retrofit_spoti_callback: Retrofit.Builder
@@ -22,7 +23,7 @@ object Api {
     fun azureApiRequest(): Endpoints {
         val interceptor = HttpLoggingInterceptor()
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
-        val client = OkHttpClient.Builder().addInterceptor(interceptor)
+        val client = OkHttpClient.Builder().addInterceptor(interceptor).readTimeout(60, TimeUnit.SECONDS)
         return Retrofit.Builder()
             .baseUrl("https://tfggroover.azurewebsites.net/")
             .client(client.build())
