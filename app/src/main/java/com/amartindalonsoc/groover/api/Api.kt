@@ -23,7 +23,7 @@ object Api {
     fun azureApiRequest(): Endpoints {
         val interceptor = HttpLoggingInterceptor()
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
-        val client = OkHttpClient.Builder().addInterceptor(interceptor).readTimeout(60, TimeUnit.SECONDS)
+        val client = OkHttpClient.Builder().addInterceptor(interceptor).readTimeout(120, TimeUnit.SECONDS)
         return Retrofit.Builder()
             .baseUrl("https://tfggroover.azurewebsites.net/")
             .client(client.build())
