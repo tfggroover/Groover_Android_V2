@@ -43,5 +43,9 @@ interface Endpoints {
     @GET("/v1/users/{user_id}/playlists")
     fun getUserPlaylists(@Path("user_id") userId: String, @Header("Authorization") token: String): Call<SpotifyUserPlaylistsResponse>
 
+    @GET("/v1/playlists/{playlist_id}/tracks")
+    fun getPlaylistTracks(@Path("playlist_id") playlistId: String, @Header("Authorization") token: String): Call<SpotifyPlaylistTracksResponse>
+
+
 
 }

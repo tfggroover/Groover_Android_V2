@@ -1,30 +1,22 @@
 package com.amartindalonsoc.groover.ui.main
 
 import android.content.Context
-import android.graphics.Typeface
 import android.os.Bundle
-import android.text.TextUtils
 import android.util.Log
-import android.util.TypedValue
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.amartindalonsoc.groover.R
 import com.amartindalonsoc.groover.activities.MainActivity
 import com.amartindalonsoc.groover.api.Api
 import com.amartindalonsoc.groover.models.ItemForRecommendation
-import com.amartindalonsoc.groover.models.Place
-import com.amartindalonsoc.groover.models.Playlist
+import com.amartindalonsoc.groover.models.SpotifyPlaylistTracksResponse
 import com.amartindalonsoc.groover.models.SpotifyTopTracksResponse
 import com.amartindalonsoc.groover.utils.Constants
 import com.amartindalonsoc.groover.utils.PlaylistDetailsAdapter
-import com.amartindalonsoc.groover.utils.SharedPreferencesManager
-import com.amartindalonsoc.groover.utils.UserPlaylistsAdapter
+import com.spotify.protocol.types.Track
 import com.squareup.picasso.Picasso
 //import com.amartindalonsoc.groover.ui.login.StoredUser
 //import com.android.volley.Request
@@ -33,17 +25,10 @@ import com.squareup.picasso.Picasso
 //import com.spotify.protocol.types.Track
 //import com.squareup.moshi.Moshi
 //import com.squareup.picasso.Picasso
-import kotlinx.android.synthetic.main.bottom_sheet.*
-import kotlinx.android.synthetic.main.bottom_sheet.view.*
-import kotlinx.android.synthetic.main.fragment_map.*
-import kotlinx.android.synthetic.main.playlist_fragment.*
 import kotlinx.android.synthetic.main.fragment_playlist_details.*
-import kotlinx.android.synthetic.main.playlist_cell.view.*
-import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import kotlin.math.round
 
 class PlaylistDetailsFragment: Fragment() {
 
@@ -51,7 +36,7 @@ class PlaylistDetailsFragment: Fragment() {
     private lateinit var playlistDetailsAdapter: PlaylistDetailsAdapter
 
     lateinit var playlistDetailsFragmentContext: Context
-    var playlist: Playlist? = null
+    lateinit var item: ItemForRecommendation
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -66,20 +51,24 @@ class PlaylistDetailsFragment: Fragment() {
         playlistDetailsFragmentContext = activity!!.applicationContext
         playlistDetailsLinearLayoutManager = LinearLayoutManager(playlistDetailsFragmentContext)
         playlist_details_recycler_view.layoutManager = playlistDetailsLinearLayoutManager
+        arrow_back.setOnClickListener {
+            activity!!.onBackPressed()
+        }
 
-        if (playlist == null) {
-            playlist_details_name.text = "Top 50 tracks recently listened"
-            getTopTracks()
-        } else {
-            playlist_details_name.text = playlist!!.name
-            if(playlist!!.images.first().url != ""){
-                Picasso.get().load(playlist!!.images.first().url).into(playlist_details_image)
+        if (item.isPlaylist) {
+            playlist_details_name.text = item.playlist!!.name
+            getPlaylistTracks(item.playlist!!.id)
+            if(item.playlist!!.images.first().url != ""){
+                Picasso.get().load(item.playlist!!.images.first().url).into(playlist_details_image)
             } else {
                 playlist_details_image.setImageResource(R.drawable.ic_profile_dark_foreground)
             }
             playlist_details_recommend_button.setOnClickListener {
-                Log.i("REC_TEST", playlist!!.name)
+                Log.i("REC_TEST", item.playlist!!.name)
             }
+        } else {
+            playlist_details_name.text = "Top 50 tracks recently listened"
+            getTopTracks()
         }
 
 
@@ -95,13 +84,39 @@ class PlaylistDetailsFragment: Fragment() {
                 if (response.isSuccessful) {
                     println("success")
                     if (response.body() != null) {
-                        playlistDetailsAdapter = PlaylistDetailsAdapter(response.body()!!.items)
+                        playlistDetailsAdapter = PlaylistDetailsAdapter(response.body()!!.items, (activity as MainActivity))
                         playlist_details_recycler_view.adapter = playlistDetailsAdapter
                     }
                 }
             }
 
             override fun onFailure(call: Call<SpotifyTopTracksResponse>, t: Throwable) {
+                Log.i("CallbackFailure", t.message)
+            }
+        })
+    }
+
+    fun getPlaylistTracks(id: String) {
+        val userToken = (activity as MainActivity).userToken
+        val requestForTracks = Api.spotifyApiRequest()
+        val callForTracks = requestForTracks.getPlaylistTracks(id, ("Bearer " + userToken))
+        callForTracks.enqueue(object : Callback<SpotifyPlaylistTracksResponse> {
+
+            override fun onResponse(call: Call<SpotifyPlaylistTracksResponse>, response: Response<SpotifyPlaylistTracksResponse>) {
+                if (response.isSuccessful) {
+                    println("success")
+                    if (response.body() != null) {
+                        val tracks = mutableSetOf<Track>()
+                        for (item in response.body()!!.items) {
+                            tracks.add(item.track)
+                        }
+                        playlistDetailsAdapter = PlaylistDetailsAdapter(tracks.toList(), (activity as MainActivity))
+                        playlist_details_recycler_view.adapter = playlistDetailsAdapter
+                    }
+                }
+            }
+
+            override fun onFailure(call: Call<SpotifyPlaylistTracksResponse>, t: Throwable) {
                 Log.i("CallbackFailure", t.message)
             }
         })

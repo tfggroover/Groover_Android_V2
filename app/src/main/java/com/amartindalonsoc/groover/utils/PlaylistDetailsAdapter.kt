@@ -3,17 +3,13 @@ package com.amartindalonsoc.groover.utils
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.amartindalonsoc.groover.R
-import com.amartindalonsoc.groover.models.ItemForRecommendation
-import com.amartindalonsoc.groover.ui.main.PlaylistDetailsFragment
+import com.amartindalonsoc.groover.activities.MainActivity
 import com.spotify.protocol.types.Track
-import com.squareup.picasso.Picasso
-import kotlinx.android.synthetic.main.playlist_cell.view.*
 import kotlinx.android.synthetic.main.song_cell.view.*
 
-class PlaylistDetailsAdapter(private val tracks: List<Track>) : RecyclerView.Adapter<PlaylistDetailsAdapter.TrackHolder>() {
+class PlaylistDetailsAdapter(private val tracks: List<Track>, private val activity: MainActivity) : RecyclerView.Adapter<PlaylistDetailsAdapter.TrackHolder>() {
 
 
 
@@ -28,7 +24,7 @@ class PlaylistDetailsAdapter(private val tracks: List<Track>) : RecyclerView.Ada
 
     override fun onBindViewHolder(holder: PlaylistDetailsAdapter.TrackHolder, position: Int) {
         val track = tracks[position]
-        holder.bindPlaylist(track)
+        holder.bindPlaylist(track, activity)
     }
 
 
@@ -44,18 +40,30 @@ class PlaylistDetailsAdapter(private val tracks: List<Track>) : RecyclerView.Ada
             Log.d("RecyclerView", "CLICK!")
         }
 
-        fun bindPlaylist(track: Track) { // Pasar esto a playlist
+        fun bindPlaylist(track: Track, activity: MainActivity) { // Pasar esto a playlist
             this.track = track
             view.song_cell_title.text = track.name
 
-            val artists = track.artists
-            var recognizedSongArtist = artists.first().name
-            if (artists.size > 1) {
-                for (i in 1 until artists.size) {
-                    recognizedSongArtist = recognizedSongArtist.plus(", " + artists[i].name)
+            if (!activity.spotifyAccountType.contentEquals("premium")) {
+                view.song_cell_play_button.setImageDrawable(null)
+            } else {
+                view.song_cell_play_button.setOnClickListener {
+                    activity.spotifyAppRemote.connectApi.connectSwitchToLocalDevice()
+                    activity.spotifyAppRemote.playerApi.play(track.uri)
                 }
             }
-            view.song_cell_artist.text = recognizedSongArtist
+            val artists = track.artists
+            if (artists != null && artists.isNotEmpty()) {
+                var recognizedSongArtist = artists.first().name
+                if (artists.size > 1) {
+                    for (i in 1 until artists.size) {
+                        recognizedSongArtist = recognizedSongArtist.plus(", " + artists[i].name)
+                    }
+                }
+                view.song_cell_artist.text = recognizedSongArtist
+            } else {
+                view.song_cell_artist.text = "Unknown"
+            }
 
             // TODO Meter el boton de play, y su funcionalidad dependiendo de si es premium o no
         }

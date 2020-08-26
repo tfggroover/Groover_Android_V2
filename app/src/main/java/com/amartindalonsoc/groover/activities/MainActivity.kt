@@ -7,16 +7,19 @@ import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.amartindalonsoc.groover.R
 import com.amartindalonsoc.groover.api.Api
+import com.amartindalonsoc.groover.models.ItemForRecommendation
 import com.amartindalonsoc.groover.models.Place
-import com.amartindalonsoc.groover.ui.main.MapFragment
-import com.amartindalonsoc.groover.ui.main.ProfileFragment
-import com.amartindalonsoc.groover.ui.main.RecognizerFragment
-import com.amartindalonsoc.groover.ui.main.RecommendationFragment
+import com.amartindalonsoc.groover.ui.main.*
+import com.amartindalonsoc.groover.utils.Constants
 import com.amartindalonsoc.groover.utils.SharedPreferencesManager
 import com.google.android.gms.maps.model.LatLng
+import com.spotify.android.appremote.api.ConnectionParams
+import com.spotify.android.appremote.api.Connector
+import com.spotify.android.appremote.api.SpotifyAppRemote
 import kotlinx.android.synthetic.main.activity_main.*
 import retrofit2.Call
 import retrofit2.Callback
@@ -24,6 +27,15 @@ import retrofit2.Response
 
 class MainActivity : AppCompatActivity() {
     lateinit var placesList: List<Place>
+    lateinit var recommendedPlacesList: List<Place>
+    lateinit var centerCoords: LatLng
+    lateinit var userToken: String
+    lateinit var spotifyAppRemote: SpotifyAppRemote
+    var itemForRecommendation: ItemForRecommendation? = null
+    var selectedItem = -1
+    var distance: Double = 100.0
+    var zoom: Float = 13.25f
+    var spotifyAccountType = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,42 +43,66 @@ class MainActivity : AppCompatActivity() {
 
         getPlaces()
 
+        userToken = SharedPreferencesManager.getString(Constants.spotify_user_token, this)!!
+        spotifyAccountType = SharedPreferencesManager.getString(Constants.spotify_account_type, this)!!
+
+        SpotifyAppRemote.connect(this, ConnectionParams.Builder(getString(R.string.client_id)).setRedirectUri(getString(R.string.redirectUri)).showAuthView(true).build(), object: Connector.ConnectionListener{
+            override fun onFailure(p0: Throwable) {
+            }
+
+            override fun onConnected(p0: SpotifyAppRemote) {
+                spotifyAppRemote = p0
+            }
+
+        })
 
         navigation.setOnNavigationItemSelectedListener {
+            val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
             when (it.itemId) {
                 R.id.navigation_home -> {
-                    val fragment = RecognizerFragment()
-                    supportFragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit()
-                    true
+                    val shouldLoad = (currentFragment !is RecognizerFragment)
+                    if (shouldLoad) {
+                        val fragment = RecognizerFragment()
+                        supportFragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit()
+                    }
+                    shouldLoad
                 }
                 R.id.navigation_map -> {
-                    val fragment = MapFragment()
-                    supportFragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit()
-                    true
+                    val shouldLoad = (currentFragment !is MapFragment)
+                    if (shouldLoad) {
+                        val fragment = MapFragment()
+                        supportFragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit()
+                    }
+                    shouldLoad
                 }
                 R.id.navigation_recommendation -> {
-                    val fragment = RecommendationFragment()
-                    supportFragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit()
-                    true
+                    val shouldLoad = (currentFragment !is RecommendationFragment)
+                    if (shouldLoad) {
+                        val fragment = RecommendationFragment()
+                        supportFragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit()
+                    }
+                    shouldLoad
                 }
                 R.id.navigation_profile -> {
-                    val fragment = ProfileFragment()
-                    supportFragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit()
-                    true
+                    val shouldLoad = (currentFragment !is ProfileFragment)
+                    if (shouldLoad) {
+                        val fragment = ProfileFragment()
+                        supportFragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit()
+                    }
+                    shouldLoad
                 }
                 else -> false
             }
         }
 
 
-        val fragment = ProfileFragment()
-        supportFragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit()
     }
 
     fun getPlaces() {
         val currentLocation = getLocation()
-        SharedPreferencesManager.saveCameraLocation(currentLocation, this)
-        SharedPreferencesManager.saveMapZoom(13.25f, this)
+        centerCoords = currentLocation
+//        SharedPreferencesManager.saveCameraLocation(currentLocation, this)
+//        SharedPreferencesManager.saveMapZoom(13.25f, this)
 
         val request = Api.azureApiRequest()
         val call = request.getPlaces(currentLocation.latitude,currentLocation.longitude,4882.0,1,25)
@@ -78,6 +114,9 @@ class MainActivity : AppCompatActivity() {
                 if (response.isSuccessful) {
                     if (response.body() != null) {
                         placesList = response.body()!!
+                        navigation.visibility = View.VISIBLE
+                        val fragment = RecommendationFragment()
+                        supportFragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit()
                     }
                 }
             }
@@ -127,18 +166,23 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        val test = supportFragmentManager.findFragmentById(R.id.fragment_container)
-        if (test is ProfileFragment) {
+        val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
+        if (currentFragment is ProfileFragment) {
             Log.i("BACK_CONTROL", "is profile")
         }
-        if (test is MapFragment) {
+        if (currentFragment is MapFragment) {
             Log.i("BACK_CONTROL", "is map")
         }
-        if (test is RecognizerFragment) {
+        if (currentFragment is RecognizerFragment) {
             Log.i("BACK_CONTROL", "is recon")
         }
-        if (test is RecommendationFragment) {
+        if (currentFragment is RecommendationFragment) {
             Log.i("BACK_CONTROL", "is recommendation")
+        }
+        if (currentFragment is PlaylistDetailsFragment) {
+            Log.i("BACK_CONTROL", "is details")
+            val fragment = RecommendationFragment()
+            supportFragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit()
         }
     }
 

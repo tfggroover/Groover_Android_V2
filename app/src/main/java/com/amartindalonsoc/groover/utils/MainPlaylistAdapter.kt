@@ -5,10 +5,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.amartindalonsoc.groover.R
+import com.amartindalonsoc.groover.activities.MainActivity
 import com.amartindalonsoc.groover.models.Song
 import kotlinx.android.synthetic.main.song_cell.view.*
 
-class MainPlaylistAdapter(private val songs: List<Song>) : RecyclerView.Adapter<MainPlaylistAdapter.SongHolder>() {
+class MainPlaylistAdapter(private val songs: List<Song>, private val activity: MainActivity) : RecyclerView.Adapter<MainPlaylistAdapter.SongHolder>() {
 
 
 
@@ -23,7 +24,7 @@ class MainPlaylistAdapter(private val songs: List<Song>) : RecyclerView.Adapter<
 
     override fun onBindViewHolder(holder: MainPlaylistAdapter.SongHolder, position: Int) {
         val song = songs[position]
-        holder.bindSong(song)
+        holder.bindSong(song, activity)
     }
 
 
@@ -48,9 +49,17 @@ class MainPlaylistAdapter(private val songs: List<Song>) : RecyclerView.Adapter<
             private val PHOTO_KEY = "PHOTO"
         }
 
-        fun bindSong(song: Song) {
+        fun bindSong(song: Song, activity: MainActivity) {
             this.song = song
             view.song_cell_title.text = song.name // TODO Meter el boton de play, y su funcionalidad dependiendo de si es premium o no
+            if (!activity.spotifyAccountType.contentEquals("premium")) {
+                view.song_cell_play_button.setImageDrawable(null)
+            } else {
+                view.song_cell_play_button.setOnClickListener {
+                    activity.spotifyAppRemote.connectApi.connectSwitchToLocalDevice()
+                    activity.spotifyAppRemote.playerApi.play("spotify:track:" + song.id)
+                }
+            }
             val artists = song.artists
             var recognizedSongArtist = artists.first().name
             if (artists.size > 1) {

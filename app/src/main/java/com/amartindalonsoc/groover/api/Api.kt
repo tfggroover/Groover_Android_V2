@@ -31,9 +31,9 @@ object Api {
     }
 
     fun spotifyApiRequest(): Endpoints {
-//        val interceptor = HttpLoggingInterceptor()
-//        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
-        val client = OkHttpClient.Builder()//.addInterceptor(interceptor)
+        val interceptor = HttpLoggingInterceptor()
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
+        val client = OkHttpClient.Builder().addInterceptor(interceptor)
         return Retrofit.Builder()
             .baseUrl("https://api.spotify.com/")
             .client(client.build())
