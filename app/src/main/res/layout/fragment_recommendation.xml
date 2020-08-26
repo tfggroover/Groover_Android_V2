@@ -42,8 +42,7 @@
                 android:layout_marginBottom="4dp"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:text="Select a playlist"
-                android:clickable="false"
+                android:text="Choose area for recommendation"
                 android:gravity="center"
                 android:background="@color/colorNavText"
                 app:layout_constraintBottom_toBottomOf="parent"/>

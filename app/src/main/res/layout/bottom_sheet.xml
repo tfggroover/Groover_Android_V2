@@ -41,13 +41,19 @@
                     android:textStyle="bold"
                     app:autoSizeTextType="uniform" />
 
-            <LinearLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
                     android:layout_marginTop="5dp"
                     android:orientation="horizontal">
 
-                <RatingBar
+                    <RatingBar
                         style="@style/Widget.AppCompat.RatingBar.Small"
                         android:id="@+id/ratingBar"
                         android:layout_width="wrap_content"
@@ -55,20 +61,42 @@
                         android:numStars="5"
                         android:rating="4.5"/>
 
-                <TextView
+                    <TextView
                         android:id="@+id/rating"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="4.7" />
 
-<!--TODO Actualizar el contador con las reviews disponibles (nuestras o de google, y abrir esa seccion al hacer click-->
-                <!--<TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="8dp"
-                        android:text="(51)" />-->
+                    <!--TODO Actualizar el contador con las reviews disponibles (nuestras o de google, y abrir esa seccion al hacer click-->
+                    <!--<TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="8dp"
+                            android:text="(51)" />-->
 
-            </LinearLayout>
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/bottom_sheet_similitude_percentage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="2dp"
+                    app:layout_constraintEnd_toStartOf="@id/bottom_sheet_similitude_playlist"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+                <TextView
+                    android:id="@+id/bottom_sheet_similitude_playlist"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="5dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+
 
 
             <View

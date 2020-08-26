@@ -1,17 +1,25 @@
 package com.amartindalonsoc.groover.utils
 
+import android.annotation.SuppressLint
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.amartindalonsoc.groover.R
+import com.amartindalonsoc.groover.activities.MainActivity
 import com.amartindalonsoc.groover.models.ItemForRecommendation
+import com.amartindalonsoc.groover.ui.main.PlaylistDetailsFragment
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.playlist_cell.view.*
+import java.util.Collections.copy
+import kotlin.math.absoluteValue
+import kotlin.properties.Delegates
 
-class UserPlaylistsAdapter(private val items: List<ItemForRecommendation>) : RecyclerView.Adapter<UserPlaylistsAdapter.PlaylistHolder>() {
+class UserPlaylistsAdapter(private val items: List<ItemForRecommendation>, private val activity: MainActivity) : RecyclerView.Adapter<UserPlaylistsAdapter.PlaylistHolder>() {
 
 
+    var lastPosition = -1
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserPlaylistsAdapter.PlaylistHolder {
         val inflatedView = parent.inflate(R.layout.playlist_cell, false)
@@ -24,20 +32,34 @@ class UserPlaylistsAdapter(private val items: List<ItemForRecommendation>) : Rec
 
     override fun onBindViewHolder(holder: UserPlaylistsAdapter.PlaylistHolder, position: Int) {
         val playlist = items[position]
+        if (activity.selectedItem == position) {
+            holder.view.setBackgroundColor(activity.getColor(R.color.selected_playlist))
+        } else {
+            holder.view.setBackgroundColor(0x00000000)
+        }
+        holder.view.setOnClickListener {
+            lastPosition = activity.selectedItem
+            activity.selectedItem = position
+            activity.itemForRecommendation = items[position]
+            notifyItemChanged(lastPosition)
+            notifyItemChanged(activity.selectedItem)
+        }
         holder.bindPlaylist(playlist)
     }
 
 
     class PlaylistHolder(v: View) : RecyclerView.ViewHolder(v), View.OnClickListener {
-        private var view: View = v
-        private var item: ItemForRecommendation? = null
+        var view: View = v
+        var item: ItemForRecommendation? = null
 
         init {
             v.setOnClickListener(this)
         }
 
+        @SuppressLint("ResourceAsColor")
         override fun onClick(v: View) {
-            Log.d("RecyclerView", "CLICK!")
+//            v.setBackgroundColor(R.color.selected_playlist)
+            Log.d("RecyclerView", "User playlist adapter")
         }
 
         fun bindPlaylist(item: ItemForRecommendation) { // Pasar esto a playlist
@@ -49,9 +71,24 @@ class UserPlaylistsAdapter(private val items: List<ItemForRecommendation>) : Rec
                 } else {
                     view.playlist_cell_image.setImageResource(R.drawable.ic_profile_dark_foreground)
                 }
+//                view.playlist_cell_title.setOnClickListener {
+//                    activity.itemForRecommendation = item
+//                }
+
+                view.playlist_cell_details_button.setOnClickListener {
+                    val fragment = PlaylistDetailsFragment()
+                    fragment.item = item
+                    (view.context as AppCompatActivity).supportFragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit()
+                }
             } else if (!item.isPlaylist) {
                 view.playlist_cell_title.text = "Top 50 tracks" //TODO Pasarlo a strings
                 view.playlist_cell_image.setImageResource(R.drawable.ic_profile_dark_foreground) //TODO Cambiar por una imagen representativa de un Top50
+
+                view.playlist_cell_details_button.setOnClickListener {
+                    val fragment = PlaylistDetailsFragment()
+                    fragment.item = item
+                    (view.context as AppCompatActivity).supportFragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit()
+                }
             }
             // TODO Meter el boton de play, y su funcionalidad dependiendo de si es premium o no
         }

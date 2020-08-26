@@ -16,11 +16,9 @@ import com.amartindalonsoc.groover.models.ItemForRecommendation
 import com.amartindalonsoc.groover.models.SpotifyTopTracksResponse
 import com.amartindalonsoc.groover.models.SpotifyUserPlaylistsResponse
 import com.amartindalonsoc.groover.utils.Constants
-import com.amartindalonsoc.groover.utils.MainPlaylistAdapter
 import com.amartindalonsoc.groover.utils.SharedPreferencesManager
 import com.amartindalonsoc.groover.utils.UserPlaylistsAdapter
 import kotlinx.android.synthetic.main.fragment_recommendation.*
-import kotlinx.android.synthetic.main.playlist_fragment.*
 //import com.amartindalonsoc.groover.ui.login.StoredUser
 //import com.android.volley.Request
 //import com.android.volley.Response
@@ -61,7 +59,12 @@ class RecommendationFragment: Fragment() {
         val itemsForRecommendation = mutableListOf<ItemForRecommendation>(ItemForRecommendation(false, null))
         getUserPlaylists(itemsForRecommendation)
 
-
+        getRecommendationButton.setOnClickListener {
+            if ((activity as MainActivity).itemForRecommendation != null) {
+                val fragment = MapFragment()
+                activity!!.supportFragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit()
+            }
+        }
 
     }
 
@@ -103,7 +106,9 @@ class RecommendationFragment: Fragment() {
                         itemForRecommendation.add(item)
                     }
 
-                    userPlaylistsAdapter = UserPlaylistsAdapter(itemForRecommendation, (activity as MainActivity))
+
+                    val activityTest = (activity as MainActivity)
+                    userPlaylistsAdapter = UserPlaylistsAdapter(itemForRecommendation, activityTest)
                     user_playlists_recycler_view.adapter = userPlaylistsAdapter
 //                    setRecyclerViewScrollListener()
                 }

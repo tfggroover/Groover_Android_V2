@@ -38,6 +38,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:background="@color/colorPrimary"
+            android:visibility="invisible"
             app:itemIconTint="@color/colorNavIcon"
             app:itemTextColor="@color/colorNavText"
             app:layout_constraintBottom_toBottomOf="parent"

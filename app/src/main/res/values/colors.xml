@@ -9,4 +9,5 @@
     <color name="colorNavText">#8B959D</color>
     <color name="selected_playlist">#5CD666</color>
     <color name="separatorView">#5D5D5D</color>
+    <color name="transparent">#00000000</color>
 </resources>

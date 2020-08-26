@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -21,22 +22,21 @@ import com.amartindalonsoc.groover.api.Api
 import com.amartindalonsoc.groover.fragments.PlaylistTypeInPlacePagerAdapter
 import com.amartindalonsoc.groover.models.Place
 import com.amartindalonsoc.groover.models.Song
-import com.amartindalonsoc.groover.utils.Constants
 import com.amartindalonsoc.groover.utils.MainPlaylistAdapter
-import com.amartindalonsoc.groover.utils.SharedPreferencesManager
+import com.amartindalonsoc.groover.utils.RecognizedSongsAdapter
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MapStyleOptions
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.*
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.maps.android.ui.BubbleIconFactory
+import com.google.maps.android.ui.IconGenerator
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.bottom_sheet.*
 import kotlinx.android.synthetic.main.bottom_sheet.view.*
 import kotlinx.android.synthetic.main.fragment_map.*
+import kotlinx.android.synthetic.main.marker_icon.view.*
 import kotlinx.android.synthetic.main.playlist_fragment.*
 import kotlinx.android.synthetic.main.recognized_fragment.*
 import retrofit2.Call
@@ -55,7 +55,7 @@ class MapFragment: Fragment(), OnMapReadyCallback {
     private lateinit var mainPlaylistLinearLayoutManager: LinearLayoutManager
     private lateinit var mainPlaylistAdapter: MainPlaylistAdapter
     private lateinit var recognizedSongsLinearLayoutManager: LinearLayoutManager
-    private lateinit var recognizedSongsAdapter: MainPlaylistAdapter
+    private lateinit var recognizedSongsAdapter: RecognizedSongsAdapter
 
     lateinit var mapFragmentContext: Context
     lateinit var centerCoords: LatLng
@@ -80,7 +80,13 @@ class MapFragment: Fragment(), OnMapReadyCallback {
 
         val fragmentAdapter = PlaylistTypeInPlacePagerAdapter(childFragmentManager)
         viewpager_main.adapter = fragmentAdapter
+        viewpager_main.isNestedScrollingEnabled = true
         tabs_main.setupWithViewPager(viewpager_main)
+
+        if ((activity as MainActivity).itemForRecommendation != null) {
+            recommendAreaButton.visibility = Button.VISIBLE
+            recommendAreaButton.text = "Recommend places in the area based in " + (activity as MainActivity).itemForRecommendation!!.playlist!!.name
+        }
 
          val mapFragment = childFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment
          mapFragment?.getMapAsync(this)
@@ -107,8 +113,8 @@ class MapFragment: Fragment(), OnMapReadyCallback {
         mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(context,R.raw.map_style))
 
 
-        val currentLocation = SharedPreferencesManager.getCameraLocation(mapFragmentContext)
-        val zoom = SharedPreferencesManager.getMapZoom(mapFragmentContext)
+        val currentLocation = (activity as MainActivity).centerCoords /*SharedPreferencesManager.getCameraLocation(mapFragmentContext)*/
+        val zoom = (activity as MainActivity).zoom /*SharedPreferencesManager.getMapZoom(mapFragmentContext)*/
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(currentLocation.latitude,currentLocation.longitude),zoom))
 
         mMap.setOnMarkerClickListener(markerClickListener)
@@ -118,12 +124,26 @@ class MapFragment: Fragment(), OnMapReadyCallback {
         }
         mMap.setOnCameraIdleListener(camerChangeListener)
         mMap.setOnCameraMoveListener {
-            Log.i("mapIdle", "mapMoved")
+//            Log.i("mapIdle", "mapMoved - " + mMap.cameraPosition.zoom)
+//            Log.i("mapIdle", "mapMoved - " + coordsDistance(mMap.projection.visibleRegion.latLngBounds.northeast,mMap.projection.visibleRegion.latLngBounds.center))
+//            Log.i("mapIdle", "mapMoved - " + mMap.projection.visibleRegion.latLngBounds.northeast)
+//            Log.i("mapIdle", "mapMoved - " + mMap.projection.visibleRegion.latLngBounds.center)
             mapMoved = true
         }
 
         searchAreaButton.setOnClickListener {
             getPlaces()
+        }
+
+        recommendAreaButton.setOnClickListener {
+            val itemForRecommendation = (activity as MainActivity).itemForRecommendation
+            if (itemForRecommendation != null) {
+                if (itemForRecommendation.isPlaylist) {
+                    getRecommendedPlacesById(itemForRecommendation.playlist!!.id)
+                } else {
+                    getRecommendedPlacesByTop()
+                }
+            }
         }
 
 
@@ -137,10 +157,13 @@ class MapFragment: Fragment(), OnMapReadyCallback {
         override fun onCameraIdle() {
             val northEastCoord = mMap.projection.visibleRegion.latLngBounds.northeast
             centerCoords = mMap.projection.visibleRegion.latLngBounds.center
+            (activity as MainActivity).centerCoords = centerCoords
             distance = coordsDistance(northEastCoord, centerCoords)
-            SharedPreferencesManager.saveFloat(Constants.map_distance_to_corner, distance.toFloat(), mapFragmentContext)
-            SharedPreferencesManager.saveMapZoom(mMap.cameraPosition.zoom, mapFragmentContext)
-            SharedPreferencesManager.saveCameraLocation(centerCoords, mapFragmentContext)
+            (activity as MainActivity).distance = distance
+            (activity as MainActivity).zoom = mMap.cameraPosition.zoom
+//            SharedPreferencesManager.saveFloat(Constants.map_distance_to_corner, distance.toFloat(), mapFragmentContext)
+//            SharedPreferencesManager.saveMapZoom(mMap.cameraPosition.zoom, mapFragmentContext)
+//            SharedPreferencesManager.saveCameraLocation(centerCoords, mapFragmentContext)
             if (mapMoved) { searchAreaButton.visibility = Button.VISIBLE }
         }
     }
@@ -173,7 +196,7 @@ class MapFragment: Fragment(), OnMapReadyCallback {
             val place = marker!!.tag as Place
             if (place.mainPlaylist != null) {
                 bottom_sheet.playlistName.text = place.mainPlaylist.name
-                mainPlaylistAdapter = MainPlaylistAdapter(place.mainPlaylist.songs)
+                mainPlaylistAdapter = MainPlaylistAdapter(place.mainPlaylist.songs, (activity as MainActivity))
                 main_playlist_recycler_view.adapter = mainPlaylistAdapter
                 if(place.mainPlaylist.imageUrl != ""){
                     Picasso.get().load(place.mainPlaylist.imageUrl).into(bottom_sheet.playlistImage)
@@ -182,13 +205,16 @@ class MapFragment: Fragment(), OnMapReadyCallback {
                 }
             } else { //TODO Revisar que con este metodo, cuando se pasa de una place con canciones a otra con canciones, no se vayan sumando las playlists
                 bottom_sheet.playlistName.text = ""
-                mainPlaylistAdapter = MainPlaylistAdapter(emptyList)
+                mainPlaylistAdapter = MainPlaylistAdapter(emptyList, (activity as MainActivity))
                 main_playlist_recycler_view.adapter = mainPlaylistAdapter
                 bottom_sheet.playlistImage.setImageResource(R.drawable.ic_profile_dark_foreground)
             }
             if (place.recognizedMusic != null) {
                 // Comprobar que esto sea correcto
-                recognizedSongsAdapter = MainPlaylistAdapter(listOf()) // TODO Cambiar el listOf() por la lista real de canciones, si no son Songs, voy a tener que crear otro adapter
+                recognizedSongsAdapter = RecognizedSongsAdapter(place.recognizedMusic, (activity as MainActivity)) // TODO Cambiar el listOf() por la lista real de canciones, si no son Songs, voy a tener que crear otro adapter
+                recognized_songs_recycler_view.adapter = recognizedSongsAdapter
+            } else {
+                recognizedSongsAdapter = RecognizedSongsAdapter(listOf(), (activity as MainActivity))
                 recognized_songs_recycler_view.adapter = recognizedSongsAdapter
             }
 
@@ -203,9 +229,18 @@ class MapFragment: Fragment(), OnMapReadyCallback {
 //            }
 
             sheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-            bottom_sheet.bar_name.text = marker.title
+            bottom_sheet.bar_name.text = place.displayName
             bottom_sheet.bar_address.text = place.address
             bottom_sheet.bar_phone.text = place.phone
+            if (place.similitude != null) {
+                Log.i("RECOMMENDED", (place.similitude * 100).toInt().toString() + "%")
+                if (place.similitude >= 1.0) {
+                    bottom_sheet.bottom_sheet_similitude_percentage.text = "100%"
+                } else {
+                    bottom_sheet.bottom_sheet_similitude_percentage.text = (place.similitude * 100).toInt().toString() + "%"
+                }
+                bottom_sheet.bottom_sheet_similitude_playlist.text = " similar to " + (activity as MainActivity).itemForRecommendation!!.playlist!!.name
+            }
 
             selectedMarker = marker
             // Return false to indicate that we have not consumed the event and that
@@ -213,63 +248,7 @@ class MapFragment: Fragment(), OnMapReadyCallback {
             return false
         }
     }
-//
-//    fun expandSetOnClickListener(place: Place, openingHours: TextView, expandedImage: ImageView){
-//        if (expanded){
-//            expandedImage.setImageResource(R.drawable.ic_expand_more)
-//
-//            val calendar = Calendar.getInstance()
-//            val today = calendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, Locale.getDefault()).toLowerCase()
-//            openingHours.text = getString(R.string.open_today, timetableDayText(place,today))
-//
-//            expanded = false
-//        }else{
-//            expandedImage.setImageResource(R.drawable.ic_expand_less)
-//
-//            openingHours.text = getString(R.string.open_times,
-//                                            timetableDayText(place,"monday"),
-//                                            timetableDayText(place,"tuesday"),
-//                                            timetableDayText(place,"wednesday"),
-//                                            timetableDayText(place,"thursday"),
-//                                            timetableDayText(place,"friday"),
-//                                            timetableDayText(place,"saturday"),
-//                                            timetableDayText(place,"sunday"))
-//            expanded = true
-//        }
-//    }
-//
-//    fun timetableDayText(place: Place, day: String): String {
-//        var dayText = ""
-//
-//        if (place.timetables.containsKey(day)){
-//            val dayOpeningMap = place.timetables[day]
-//            val dayOpeningKeys = dayOpeningMap?.keys?.sorted()
-//
-//            if (dayOpeningKeys != null){
-//                for (startTime in dayOpeningKeys){
-//                    if (startTime == "Closed"){
-//                        dayText = "Closed"
-//                    }else{
-//                        dayText = dayText.plus(startTime + " - " + dayOpeningMap?.get(startTime) + " and ")
-//                    }
-//                }
-//                if (dayText.takeLast(5) == " and "){
-//                    dayText = dayText.dropLast(5)
-//                }
-//            }else{
-//                dayText = "Closed"
-//            }
-//        }else{
-//            dayText = "Closed"
-//        }
-//        return dayText
-//    }
-//
-//    /////// Aux functions, move later
-//    fun dpToPx(dp: Int): Int {
-//        val density = this.resources.displayMetrics.density
-//        return round(dp * density).toInt()
-//    }
+
     private val REQUEST_EXTERNAL_STORAGE = 1
     private val PERMISSIONS = arrayOf<String>(
         Manifest.permission.ACCESS_NETWORK_STATE,
@@ -319,6 +298,88 @@ class MapFragment: Fragment(), OnMapReadyCallback {
         })
     }
 
+    fun getRecommendedPlacesById(playlistForRecommendationId: String) {
+        val userToken = (activity as MainActivity).userToken
+        val request = Api.azureApiRequest()
+        val call = request.getRecommendation(playlistForRecommendationId, centerCoords.latitude, centerCoords.longitude,distance, (/*"Bearer " + */userToken),1,25)
+        call.enqueue(object : Callback<List<Place>> {
+
+            override fun onResponse(call: Call<List<Place>>, response: Response<List<Place>>) {
+                Log.i("getPlaces",response.message())
+                Log.i("getPlaces",response.body().toString())
+                if (response.isSuccessful) {
+                    if (response.body() != null) {
+                        (activity as MainActivity).recommendedPlacesList = response.body()!!
+                        mMap.clear()
+                        showRecommendedPlaces()
+                        searchAreaButton.visibility = Button.INVISIBLE
+                    }
+                }
+            }
+
+            override fun onFailure(call: Call<List<Place>>, t: Throwable) {
+                Log.i("CallbackFailurePlaces", t.message)
+            }
+
+        })
+    }
+
+    fun getRecommendedPlacesByTop() {
+        val userToken = (activity as MainActivity).userToken
+        val request = Api.azureApiRequest()
+        val call = request.getRecommendationTop(centerCoords.latitude, centerCoords.longitude,distance, (/*"Bearer " + */userToken),1,25)
+        call.enqueue(object : Callback<List<Place>> {
+
+            override fun onResponse(call: Call<List<Place>>, response: Response<List<Place>>) {
+                Log.i("getPlaces",response.message())
+                Log.i("getPlaces",response.body().toString())
+                if (response.isSuccessful) {
+                    if (response.body() != null) {
+                        (activity as MainActivity).recommendedPlacesList = response.body()!!
+                        mMap.clear()
+                        showRecommendedPlaces()
+                        searchAreaButton.visibility = Button.INVISIBLE
+                    }
+                }
+            }
+
+            override fun onFailure(call: Call<List<Place>>, t: Throwable) {
+                Log.i("CallbackFailurePlaces", t.message)
+            }
+
+        })
+    }
+
+    fun showRecommendedPlaces() {
+        val places = (activity as MainActivity).recommendedPlacesList
+        places.sortedWith(compareBy(nullsLast<Double>()) {it.similitude})
+        var counter = 1
+        for (place in places) {
+            Log.i("RECOMMENDATION", place.displayName)
+            if (place.similitude != null) {
+                var title = ""
+                if (place.similitude >= 1.0) {
+                    title = "100%"
+                } else {
+                    title = (place.similitude * 100).toInt().toString() + "%"
+                }
+                val iconGenerator = IconGenerator(mapFragmentContext)
+                val view: View = LayoutInflater.from(mapFragmentContext).inflate(R.layout.marker_icon, null)
+                view.marker_text.text = title
+                iconGenerator.setColor(R.color.transparent)
+                iconGenerator.setBackground(ColorDrawable((activity as MainActivity).getColor(R.color.transparent)))
+                iconGenerator.setContentView(view)
+                val test = iconGenerator.makeIcon()
+                val marker = mMap.addMarker(MarkerOptions().position(LatLng(place.location.latitude,place.location.longitude)).title(place.displayName).icon(BitmapDescriptorFactory.fromBitmap(test)/*.fromResource(R.drawable.icons1)*/))
+                marker.tag = place
+                counter += 1
+            } else {
+                val marker = mMap.addMarker(MarkerOptions().position(LatLng(place.location.latitude,place.location.longitude)).title(place.displayName))
+                marker.tag = place
+            }
+        }
+    }
+
     fun showPlaces() {
         for (place in (activity as MainActivity).placesList) {
             val marker = mMap.addMarker(
@@ -352,6 +413,12 @@ class MapFragment: Fragment(), OnMapReadyCallback {
 
     private fun setRecyclerViewScrollListener() {
         main_playlist_recycler_view.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                val totalItemCount = recyclerView.layoutManager!!.itemCount
+            }
+        })
+        recognized_songs_recycler_view.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 val totalItemCount = recyclerView.layoutManager!!.itemCount

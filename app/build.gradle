@@ -53,6 +53,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-location:17.0.0'
     implementation 'com.google.firebase:firebase-auth-ktx:19.3.2'
     implementation 'com.google.firebase:firebase-analytics-ktx:17.5.0'
+    implementation 'com.google.maps.android:maps-utils-ktx:2.1.1'
     implementation project(":spotify-app-remote")
     implementation 'com.spotify.android:auth:1.2.3'
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
