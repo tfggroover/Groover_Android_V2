@@ -31,6 +31,8 @@
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:textSize="18sp"
+        android:textColor="@color/black"
+        android:fontFamily="@font/prototype_regular"
         tools:text="Title" />
 
     <TextView
@@ -39,6 +41,8 @@
         android:layout_height="0dp"
         android:gravity="center_vertical"
         android:text="Details"
+        android:textColor="@color/black"
+        android:fontFamily="@font/prototype_regular"
         app:layout_constraintStart_toEndOf="@id/playlist_cell_title"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/playlist_cell_image"

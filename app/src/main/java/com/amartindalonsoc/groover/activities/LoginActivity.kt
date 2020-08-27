@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.amartindalonsoc.groover.R
@@ -39,7 +40,7 @@ class LoginActivity : AppCompatActivity() {
         verifyPermissions()
         auth = Firebase.auth
 
-        val loginButton = findViewById<Button>(R.id.login_button)
+        val loginButton = findViewById<ImageView>(R.id.login_button)
         loginButton.setOnClickListener {
             val builder = AuthorizationRequest.Builder(getString(R.string.client_id), AuthorizationResponse.Type.CODE, getString(R.string.redirectUri))
             builder.setScopes(arrayOf("app-remote-control", "user-read-email", "user-read-recently-played", "playlist-read-private", "streaming", "user-read-private","user-modify-playback-state","user-top-read"))

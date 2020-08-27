@@ -2,10 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:paddingTop="16dp">
+        xmlns:app="http://schemas.android.com/apk/res-auto">
 
 
 
@@ -14,8 +11,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Choose you top 50 tracks"
-                android:textSize="17sp"
+                android:textSize="18sp"
                 android:gravity="center"
+            android:textColor="@color/black"
+            android:fontFamily="@font/prototype_regular"
+            android:paddingTop="16dp"
+            android:background="@color/mainAppColor"
                 app:layout_constraintTop_toTopOf="parent"/>
 
         <TextView
@@ -23,7 +24,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="or a playlist to get your recommendations"
-                android:textSize="17sp"
+                android:textSize="18sp"
+            android:textColor="@color/black"
+            android:fontFamily="@font/prototype_regular"
+            android:paddingBottom="16dp"
+            android:background="@color/mainAppColor"
                 android:gravity="center"
                 app:layout_constraintTop_toBottomOf="@id/topSongsTextView"/>
 
@@ -31,21 +36,26 @@
             android:id="@+id/user_playlists_recycler_view"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_marginVertical="5dp"
+            android:layout_marginVertical="10dp"
+            android:layout_marginHorizontal="16dp"
             app:layout_constraintBottom_toTopOf="@id/getRecommendationButton"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/choosePlaylistTextView" />
 
-        <TextView
-                android:id="@+id/getRecommendationButton"
-                android:layout_marginBottom="4dp"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:text="Choose area for recommendation"
-                android:gravity="center"
-                android:background="@color/colorNavText"
-                app:layout_constraintBottom_toBottomOf="parent"/>
+        <Button
+            android:id="@+id/getRecommendationButton"
+            android:layout_marginBottom="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="@drawable/bordered_button"
+            android:fontFamily="@font/prototype_regular"
+            android:textAllCaps="false"
+            android:textSize="18sp"
+            android:layout_marginHorizontal="15dp"
+            android:text="Choose area for recommendation"
+            android:gravity="center"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
 
 

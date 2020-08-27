@@ -2,8 +2,6 @@ package com.amartindalonsoc.groover.ui.main
 
 import android.app.AlertDialog
 import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -14,7 +12,6 @@ import com.amartindalonsoc.groover.utils.Constants
 import com.amartindalonsoc.groover.utils.SharedPreferencesManager
 import com.amartindalonsoc.groover.utils.Utils
 import com.spotify.sdk.android.auth.AuthorizationClient
-import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.fragment_profile.*
 
@@ -58,6 +55,21 @@ class ProfileFragment: Fragment() {
                 dialog.dismiss()
             }
             logoutPopup.show()
+        }
+
+        deleteAccount.setOnClickListener {
+            val deleteAccountPopup = AlertDialog.Builder(activity!!)
+            deleteAccountPopup.setTitle("Delete Groover account")
+            deleteAccountPopup.setMessage("Are you sure you want to delete your Groover account?")
+            deleteAccountPopup.setPositiveButton("Yes"){ dialog, which ->
+                SharedPreferencesManager.logout(profileFragmentContext)
+                AuthorizationClient.clearCookies(profileFragmentContext)
+                Utils.startLoginActivity(activity!!)
+            }
+            deleteAccountPopup.setNegativeButton("No") { dialog, which ->
+                dialog.dismiss()
+            }
+            deleteAccountPopup.show()
         }
 
     }

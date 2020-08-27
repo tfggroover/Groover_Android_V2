@@ -107,11 +107,12 @@ class RecognizerFragment: Fragment(), IACRCloudListener {
             mProcessing = true
 //            volume.text = ""
 //            songRecognized.text = ""
-            loadingAndImageParams.gravity = Gravity.CENTER
+//            loadingAndImageParams.gravity = Gravity.CENTER
             loadingView.isIndeterminate = true
-            loadingView.layoutParams = loadingAndImageParams
+//            loadingView.layoutParams = loadingAndImageParams
             removeViews()
-            homeContentLinearLayout.addView(loadingView)
+            containter_view.addView(loadingView)
+//            homeContentLinearLayout.addView(loadingView)
             searchSong.text = "Cancel search"
             searchSong.setOnClickListener { cancel() }
 
@@ -130,8 +131,10 @@ class RecognizerFragment: Fragment(), IACRCloudListener {
         this.reset()
         loadingAndImageParams.gravity = Gravity.CENTER
         songRecognizedImage.setImageResource(R.drawable.not_recognized)
-        homeContentLinearLayout.removeView(loadingView)
-        homeContentLinearLayout.addView(songRecognizedImage)
+//        homeContentLinearLayout.removeView(loadingView)
+//        homeContentLinearLayout.addView(songRecognizedImage)
+        containter_view.removeAllViews()
+        containter_view.addView(songRecognizedImage)
         searchSong.text = "Try again!"
         searchSong.setOnClickListener { start() }
     }
@@ -158,13 +161,14 @@ class RecognizerFragment: Fragment(), IACRCloudListener {
                 val recognizedSongName = resultAsJson.metadata.music.first().title
                 val recognizedSongSpotifyId = resultAsJson.metadata.music.first().externalMetadata!!.spotify!!.track.id
                 val recognizedSongSpotifyName = resultAsJson.metadata.music.first().externalMetadata!!.spotify!!.track.name
+                val recognizedSongArtists = resultAsJson.metadata.music.first().artists
                 val recognizedSongSpotifyArtists = resultAsJson.metadata.music.first().externalMetadata!!.spotify!!.artists
 
 //                val recognizedSongArtistList = resultAsJson.metadata.music.first().artists
-                var recognizedSongArtist = recognizedSongSpotifyArtists.first().name
-                if (recognizedSongSpotifyArtists.size > 1) {
-                    for (i in 1 until recognizedSongSpotifyArtists.size) {
-                        recognizedSongArtist = recognizedSongArtist.plus(", " + recognizedSongSpotifyArtists[i].name)
+                var recognizedSongArtist = recognizedSongArtists.first().name
+                if (recognizedSongArtists.size > 1) {
+                    for (i in 1 until recognizedSongArtists.size) {
+                        recognizedSongArtist = recognizedSongArtist.plus(", " + recognizedSongArtists[i].name)
                     }
                 }
 
@@ -205,6 +209,7 @@ class RecognizerFragment: Fragment(), IACRCloudListener {
 
     fun removeViews(){
         homeContentLinearLayout.removeAllViews()
+        containter_view.removeAllViews()
         songRecognizedImage.setImageDrawable(null)
         songRecognizedName.text = ""
         songRecognizedArtist.text = ""
@@ -238,8 +243,10 @@ class RecognizerFragment: Fragment(), IACRCloudListener {
         TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(songRecognizedName, 8, 16, 1, TypedValue.COMPLEX_UNIT_SP)
         TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(songRecognizedArtist, 8, 16, 1, TypedValue.COMPLEX_UNIT_SP)
         loadingAndImageParams.gravity = Gravity.CENTER
-        homeContentLinearLayout.removeView(loadingView)
-        homeContentLinearLayout.addView(songRecognizedImage)
+//        homeContentLinearLayout.removeView(loadingView)
+//        homeContentLinearLayout.addView(songRecognizedImage)
+        containter_view.removeAllViews()
+        containter_view.addView(songRecognizedImage)
         homeContentLinearLayout.addView(songRecognizedName)
         homeContentLinearLayout.addView(songRecognizedArtist)
         searchSong.text = "Search"
@@ -248,36 +255,38 @@ class RecognizerFragment: Fragment(), IACRCloudListener {
 
 
     data class RecognizedSongForBack (val id: String, val name: String, val artists: List<RecognizedSpotifyArtist>)
-    fun sendRecognizedSong(id: String, name: String, artists: List<RecognizedSpotifyArtist>) {
-        val recognizedSongToSend = RecognizedSongForBack(id, name, artists)
-        val currentLocation = getLocation()
-        val request = Api.azureApiRequest()
-        val call = request.getPlaces(currentLocation.latitude,currentLocation.longitude,50.0,1,25)
-        call.enqueue(object : Callback<List<Place>> {
+    fun sendRecognizedSong(id: String?, name: String?, artists: List<RecognizedSpotifyArtist>?) {
+        if (id != null && name != null && artists != null) {
+            val recognizedSongToSend = RecognizedSongForBack(id, name, artists)
+            val currentLocation = getLocation()
+            val request = Api.azureApiRequest()
+            val call = request.getPlaces(currentLocation.latitude,currentLocation.longitude,50.0,1,25)
+            call.enqueue(object : Callback<List<Place>> {
 
-            override fun onResponse(call: Call<List<Place>>, response: Response<List<Place>>) {
-                if (response.isSuccessful) {
-                    if (response.body() != null && response.body()!!.isNotEmpty()) {
-                        val firebaseBearer = SharedPreferencesManager.getFirebaseBearer(recognizedFragmentContext)
-                        Log.i("BEARER", firebaseBearer)
-                        request.addRecognizedSong(response.body()!!.first().id, ("Bearer " + firebaseBearer),recognizedSongToSend).enqueue(object: Callback<Any> {
-                            override fun onFailure(call: Call<Any>, t: Throwable) {
-                                Log.i("SongNotAdded", t.message)
-                            }
+                override fun onResponse(call: Call<List<Place>>, response: Response<List<Place>>) {
+                    if (response.isSuccessful) {
+                        if (response.body() != null && response.body()!!.isNotEmpty()) {
+                            val firebaseBearer = SharedPreferencesManager.getFirebaseBearer(recognizedFragmentContext)
+                            Log.i("BEARER", firebaseBearer)
+                            request.addRecognizedSong(response.body()!!.first().id, ("Bearer " + firebaseBearer),recognizedSongToSend).enqueue(object: Callback<Any> {
+                                override fun onFailure(call: Call<Any>, t: Throwable) {
+                                    Log.i("SongNotAdded", t.message)
+                                }
 
-                            override fun onResponse(call: Call<Any>, response: Response<Any>) {
-                                Log.i("SongAdded", "Successfully added song to place")
-                            }
-                        })
+                                override fun onResponse(call: Call<Any>, response: Response<Any>) {
+                                    Log.i("SongAdded", "Successfully added song to place")
+                                }
+                            })
+                        }
                     }
                 }
-            }
 
-            override fun onFailure(call: Call<List<Place>>, t: Throwable) {
-                Log.i("PlacesFailure", t.message)
-            }
+                override fun onFailure(call: Call<List<Place>>, t: Throwable) {
+                    Log.i("PlacesFailure", t.message)
+                }
 
-        })
+            })
+        }
     }
 
 

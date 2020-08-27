@@ -85,7 +85,7 @@ class MapFragment: Fragment(), OnMapReadyCallback {
 
         if ((activity as MainActivity).itemForRecommendation != null) {
             recommendAreaButton.visibility = Button.VISIBLE
-            recommendAreaButton.text = "Recommend places in the area based in " + (activity as MainActivity).itemForRecommendation!!.playlist!!.name
+            recommendAreaButton.text = "Recommend places in the area based in \n \"" + (activity as MainActivity).itemForRecommendation!!.playlist!!.name + "\""
         }
 
          val mapFragment = childFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment

@@ -20,28 +20,36 @@
             layout="@layout/activity_map" />
 
         <Button
-            android:id="@+id/recommendAreaButton"
-            android:layout_width="250dp"
-            android:layout_height="wrap_content"
-            android:text="Recommend places in the area based in..."
-            android:textAllCaps="false"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginTop="50dp"
-            android:visibility="invisible"/>
-
-        <Button
             android:id="@+id/searchAreaButton"
             android:layout_width="250dp"
             android:layout_height="wrap_content"
             android:text="Search this area"
+            android:background="@drawable/bordered_button"
+            android:fontFamily="@font/prototype_regular"
             android:textAllCaps="false"
+            android:textSize="18sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/recommendAreaButton"
-            android:layout_marginTop="10dp"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="40dp"
             android:visibility="invisible"/>
+
+        <Button
+            android:id="@+id/recommendAreaButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Recommend places in the area based in..."
+            android:background="@drawable/bordered_button"
+            android:fontFamily="@font/prototype_regular"
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/searchAreaButton"
+            android:layout_marginHorizontal="15dp"
+            android:layout_marginTop="15dp"
+            android:visibility="invisible"/>
+
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

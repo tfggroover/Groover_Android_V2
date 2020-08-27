@@ -115,7 +115,7 @@ class MainActivity : AppCompatActivity() {
                     if (response.body() != null) {
                         placesList = response.body()!!
                         navigation.visibility = View.VISIBLE
-                        val fragment = RecommendationFragment()
+                        val fragment = MapFragment()
                         supportFragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit()
                     }
                 }

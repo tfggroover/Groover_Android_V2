@@ -2,12 +2,14 @@
 <resources>
     <color name="colorPrimary">#000000</color>
     <color name="colorPrimaryDark">#000000</color>
+    <color name="mainAppColor">#45EB7D</color>
     <color name="colorAccent">#2196F3</color>
     <color name="white">#ffffff</color>
     <color name="black">#000000</color>
     <color name="color_text">#495459</color>    <color name="colorNavIcon">#dae9f6</color>
     <color name="colorNavText">#8B959D</color>
-    <color name="selected_playlist">#5CD666</color>
+    <color name="selected_playlist">#45EB7D</color>
     <color name="separatorView">#5D5D5D</color>
     <color name="transparent">#00000000</color>
+    <color name="red_delete">#B61E11</color>
 </resources>
