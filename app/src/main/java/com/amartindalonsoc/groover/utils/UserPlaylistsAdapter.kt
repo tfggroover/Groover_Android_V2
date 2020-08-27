@@ -40,7 +40,11 @@ class UserPlaylistsAdapter(private val items: List<ItemForRecommendation>, priva
         holder.view.setOnClickListener {
             lastPosition = activity.selectedItem
             activity.selectedItem = position
-            activity.itemForRecommendation = items[position]
+            if (items[position].isPlaylist) {
+                activity.itemForRecommendation = items[position]
+            } else {
+                activity.itemForRecommendation = ItemForRecommendation(false, null)
+            }
             notifyItemChanged(lastPosition)
             notifyItemChanged(activity.selectedItem)
         }

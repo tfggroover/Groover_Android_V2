@@ -84,8 +84,12 @@ class MapFragment: Fragment(), OnMapReadyCallback {
         tabs_main.setupWithViewPager(viewpager_main)
 
         if ((activity as MainActivity).itemForRecommendation != null) {
+            if ((activity as MainActivity).itemForRecommendation!!.isPlaylist) {
+                recommendAreaButton.text = "Recommend places in the area based in \n \"" + (activity as MainActivity).itemForRecommendation!!.playlist!!.name + "\""
+            } else {
+                recommendAreaButton.text = "Recommend places in the area based in \n your Top 50 tracks from Spotify"
+            }
             recommendAreaButton.visibility = Button.VISIBLE
-            recommendAreaButton.text = "Recommend places in the area based in \n \"" + (activity as MainActivity).itemForRecommendation!!.playlist!!.name + "\""
         }
 
          val mapFragment = childFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment
