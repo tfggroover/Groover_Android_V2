@@ -117,7 +117,9 @@ object SharedPreferencesManager {
         prefs[Constants.user_email] = spotifyLoginCallback.spotifyUserData.email
         prefs[Constants.user_country] = spotifyLoginCallback.spotifyUserData.country
         prefs[Constants.spotify_account_type] = spotifyLoginCallback.spotifyUserData.product
-        prefs[Constants.profile_image] = spotifyLoginCallback.spotifyUserData.images.first().url //TODO Revisar si una cuenta sin imagen peta
+        if (spotifyLoginCallback.spotifyUserData.images.isNotEmpty()) {
+            prefs[Constants.profile_image] = spotifyLoginCallback.spotifyUserData.images.first().url
+        }
 
     }
 
@@ -130,7 +132,9 @@ object SharedPreferencesManager {
         prefs[Constants.user_email] = spotifyRefresh.spotifyUserData.email
         prefs[Constants.user_country] = spotifyRefresh.spotifyUserData.country
         prefs[Constants.spotify_account_type] = spotifyRefresh.spotifyUserData.product
-        prefs[Constants.profile_image] = spotifyRefresh.spotifyUserData.images.first().url //TODO Revisar si una cuenta sin imagen peta
+        if (spotifyRefresh.spotifyUserData.images.isNotEmpty()) {
+            prefs[Constants.profile_image] = spotifyRefresh.spotifyUserData.images.first().url
+        }
 
     }
 
