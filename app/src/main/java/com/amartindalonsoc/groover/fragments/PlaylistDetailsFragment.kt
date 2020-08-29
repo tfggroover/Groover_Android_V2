@@ -26,6 +26,7 @@ import com.squareup.picasso.Picasso
 //import com.squareup.moshi.Moshi
 //import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.fragment_playlist_details.*
+import kotlinx.android.synthetic.main.playlist_cell.view.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -68,6 +69,7 @@ class PlaylistDetailsFragment: Fragment() {
             }
         } else {
             playlist_details_name.text = "Top 50 tracks recently listened"
+            playlist_details_image.setImageResource(R.drawable.ic_profile_dark_foreground)
             getTopTracks()
         }
 
@@ -121,31 +123,5 @@ class PlaylistDetailsFragment: Fragment() {
             }
         })
     }
-
-
-/*    fun getTopBasedRecommendation(): List<Place> {
-        val request = Api.azureApiRequest()
-        val call = request.getPlaces(centerCoords.latitude,centerCoords.longitude,distance,1,25)
-        call.enqueue(object : Callback<List<Place>> {
-
-            override fun onResponse(call: Call<List<Place>>, response: Response<List<Place>>) {
-                Log.i("getPlaces",response.message())
-                Log.i("getPlaces",response.body().toString())
-                if (response.isSuccessful) {
-                    if (response.body() != null) {
-                        (activity as MainActivity).placesList = response.body()!!
-                        mMap.clear()
-                        showPlaces()
-                        searchAreaButton.visibility = Button.INVISIBLE
-                    }
-                }
-            }
-
-            override fun onFailure(call: Call<List<Place>>, t: Throwable) {
-                Log.i("CallbackFailurePlaces", t.message)
-            }
-
-        })
-    }*/
 
 }

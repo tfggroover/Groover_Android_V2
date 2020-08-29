@@ -81,7 +81,6 @@ class LoginActivity : AppCompatActivity() {
                         SharedPreferencesManager.saveUserFromCallback(response.body()!!, loginActivity)
                         Log.i("newlogintest_saveddata", SharedPreferencesManager.getString(Constants.user_name, loginActivity)!!)
                         Log.i("newlogintest_saveddata", SharedPreferencesManager.getString(Constants.user_email, loginActivity)!!)
-//                        getPlaces()
                         firebaseLogin()
 
                     }
@@ -120,33 +119,6 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-//    fun getPlaces() {
-//        val currentLocation = getLocation()
-//        SharedPreferencesManager.saveCameraLocation(currentLocation, this)
-//        SharedPreferencesManager.saveMapZoom(13.25f, this)
-//
-//        val request = Api.azureApiRequest()
-//        val call = request.getPlaces(currentLocation.latitude,currentLocation.longitude,4882.0,1,25)
-//        call.enqueue(object : Callback<List<Place>>{
-//
-//            override fun onResponse(call: Call<List<Place>>, response: Response<List<Place>>) {
-//                Log.i("getPlaces",response.message())
-//                Log.i("getPlaces",response.body().toString())
-//                if (response.isSuccessful) {
-//                    if (response.body() != null) {
-//                        SharedPreferencesManager.savePlacesFromCallback(response.body()!!, loginActivity)
-//                        Utils.startMainActivity(loginActivity)
-//                    }
-//                }
-//            }
-//
-//            override fun onFailure(call: Call<List<Place>>, t: Throwable) {
-//                Log.i("CallbackFailurePlaces", t.message)
-//            }
-//
-//        })
-//    }
-
     private val REQUEST_EXTERNAL_STORAGE = 1
     private val PERMISSIONS = arrayOf<String>(
         Manifest.permission.ACCESS_NETWORK_STATE,
@@ -169,41 +141,5 @@ class LoginActivity : AppCompatActivity() {
             }
         }
     }
-//
-//    // Location
-//    @SuppressLint("MissingPermission")
-//    fun getLocation(): LatLng {
-//        val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-//        val hasGps = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
-//        var locationGps: Location? = null
-//        if (hasGps) {
-//            Log.d("CodeAndroidLocation", "hasGps")
-//            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 0F, object :
-//                LocationListener {
-//                override fun onLocationChanged(location: Location?) {
-//                    if (location != null) {
-//                        locationGps = location
-//                        Log.d("CodeAndroidLocation", " GPS Latitude : " + locationGps!!.latitude)
-//                        Log.d("CodeAndroidLocation", " GPS Longitude : " + locationGps!!.longitude)
-//                    }
-//                }
-//                override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
-//                }
-//                override fun onProviderEnabled(provider: String?) {
-//                }
-//                override fun onProviderDisabled(provider: String?) {
-//                }
-//            })
-//
-//            val localGpsLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-//            if (localGpsLocation != null)
-//                locationGps = localGpsLocation
-//        }
-//
-//        if(locationGps!= null){
-//            return LatLng(locationGps!!.latitude,locationGps!!.longitude)
-//        }
-//
-//        return LatLng(0.0,0.0)
-//    }
+
 }

@@ -75,9 +75,6 @@ class UserPlaylistsAdapter(private val items: List<ItemForRecommendation>, priva
                 } else {
                     view.playlist_cell_image.setImageResource(R.drawable.ic_profile_dark_foreground)
                 }
-//                view.playlist_cell_title.setOnClickListener {
-//                    activity.itemForRecommendation = item
-//                }
 
                 view.playlist_cell_details_button.setOnClickListener {
                     val fragment = PlaylistDetailsFragment()
@@ -94,7 +91,6 @@ class UserPlaylistsAdapter(private val items: List<ItemForRecommendation>, priva
                     (view.context as AppCompatActivity).supportFragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit()
                 }
             }
-            // TODO Meter el boton de play, y su funcionalidad dependiendo de si es premium o no
         }
 
     }

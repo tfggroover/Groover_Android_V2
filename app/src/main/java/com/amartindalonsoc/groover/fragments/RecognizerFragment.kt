@@ -66,7 +66,6 @@ class RecognizerFragment: Fragment(), IACRCloudListener {
         recognizedFragmentContext = activity!!.applicationContext
 
         verifyPermissions()
-//        globalVars.currentFragment = "home"
 
         /// Music recognizer
         loadingView = ProgressBar(activity!!.applicationContext)
@@ -105,20 +104,14 @@ class RecognizerFragment: Fragment(), IACRCloudListener {
 
         if (!mProcessing){
             mProcessing = true
-//            volume.text = ""
-//            songRecognized.text = ""
-//            loadingAndImageParams.gravity = Gravity.CENTER
             loadingView.isIndeterminate = true
-//            loadingView.layoutParams = loadingAndImageParams
             removeViews()
             containter_view.addView(loadingView)
-//            homeContentLinearLayout.addView(loadingView)
             searchSong.text = "Cancel search"
             searchSong.setOnClickListener { cancel() }
 
             if (this.mClient == null || !this.mClient.startRecognize()){
                 mProcessing = false
-//                songRecognized.text = "start error!"
             }
             startTime = System.currentTimeMillis()
         }
@@ -131,8 +124,6 @@ class RecognizerFragment: Fragment(), IACRCloudListener {
         this.reset()
         loadingAndImageParams.gravity = Gravity.CENTER
         songRecognizedImage.setImageResource(R.drawable.not_recognized)
-//        homeContentLinearLayout.removeView(loadingView)
-//        homeContentLinearLayout.addView(songRecognizedImage)
         containter_view.removeAllViews()
         containter_view.addView(songRecognizedImage)
         searchSong.text = "Try again!"
@@ -140,7 +131,6 @@ class RecognizerFragment: Fragment(), IACRCloudListener {
     }
 
     fun reset(){
-//        songRecognized.text = ""
         mProcessing = false
     }
 
@@ -226,8 +216,6 @@ class RecognizerFragment: Fragment(), IACRCloudListener {
         if (this.mClient != null){
             this.mClient.release()
             this.initState = false
-
-            //this.mClient = null
         }
     }
 
@@ -243,8 +231,6 @@ class RecognizerFragment: Fragment(), IACRCloudListener {
         TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(songRecognizedName, 8, 16, 1, TypedValue.COMPLEX_UNIT_SP)
         TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(songRecognizedArtist, 8, 16, 1, TypedValue.COMPLEX_UNIT_SP)
         loadingAndImageParams.gravity = Gravity.CENTER
-//        homeContentLinearLayout.removeView(loadingView)
-//        homeContentLinearLayout.addView(songRecognizedImage)
         containter_view.removeAllViews()
         containter_view.addView(songRecognizedImage)
         homeContentLinearLayout.addView(songRecognizedName)
