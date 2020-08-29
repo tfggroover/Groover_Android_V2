@@ -58,7 +58,7 @@ class PlaylistDetailsFragment: Fragment() {
         if (item.isPlaylist) {
             playlist_details_name.text = item.playlist!!.name
             getPlaylistTracks(item.playlist!!.id)
-            if(item.playlist!!.images.first().url != ""){
+            if(item.playlist!!.images.isNotEmpty() && item.playlist!!.images.first().url != ""){
                 Picasso.get().load(item.playlist!!.images.first().url).into(playlist_details_image)
             } else {
                 playlist_details_image.setImageResource(R.drawable.ic_profile_dark_foreground)

@@ -70,7 +70,7 @@ class UserPlaylistsAdapter(private val items: List<ItemForRecommendation>, priva
             this.item = item
             if (item.isPlaylist && item.playlist != null) {
                 view.playlist_cell_title.text = item.playlist.name
-                if(item.playlist.images.first().url != ""){
+                if(item.playlist.images.isNotEmpty() && item.playlist.images.first().url != ""){
                     Picasso.get().load(item.playlist.images.first().url).into(view.playlist_cell_image)
                 } else {
                     view.playlist_cell_image.setImageResource(R.drawable.ic_profile_dark_foreground)
