@@ -1,9 +1,13 @@
 package com.amartindalonsoc.groover.activities
 
+import android.Manifest
 import android.app.Activity
+import android.app.AlertDialog
+import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import androidx.core.app.ActivityCompat
 import com.amartindalonsoc.groover.R
 import com.amartindalonsoc.groover.api.Api
 import com.amartindalonsoc.groover.models.SpotifyRefresh
@@ -23,6 +27,7 @@ class SplashScreen : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.splash_screen)
+        verifyPermissions()
         auth = Firebase.auth
 //        Thread.sleep(2000) // Temporal, se pasa al login despues de cargar los datos necesarios
 
@@ -91,5 +96,53 @@ class SplashScreen : AppCompatActivity() {
             }
         }
     }
+
+
+    private val REQUEST_EXTERNAL_STORAGE = 1
+    private val PERMISSIONS = arrayOf<String>(
+        Manifest.permission.ACCESS_NETWORK_STATE,
+        Manifest.permission.ACCESS_WIFI_STATE,
+        Manifest.permission.INTERNET,
+        Manifest.permission.RECORD_AUDIO,
+        Manifest.permission.ACCESS_FINE_LOCATION,
+        Manifest.permission.ACCESS_COARSE_LOCATION
+    )
+
+    fun verifyPermissions() {
+        for (i in PERMISSIONS.indices) {
+            val permission = ActivityCompat.checkSelfPermission(this, PERMISSIONS[i])
+            if (permission != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(
+                    this, PERMISSIONS,
+                    REQUEST_EXTERNAL_STORAGE
+                )
+                break
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        for (i in permissions.indices) {
+            if (grantResults[i] != PackageManager.PERMISSION_GRANTED && (permissions[i] == Manifest.permission.RECORD_AUDIO || permissions[i] == Manifest.permission.ACCESS_FINE_LOCATION)) {
+                if (shouldShowRequestPermissionRationale(permissions[i])) {
+                    verifyPermissions()
+                } else {
+                    val closeAppPopup = AlertDialog.Builder(this)
+                    closeAppPopup.setTitle("Permissions required")
+                    closeAppPopup.setMessage("Location and microphone permissions are required to use the app. Enable them in Settings and restart the app.")
+                    closeAppPopup.setPositiveButton("Close"){ _, _ ->
+                        finish()
+                    }
+                    closeAppPopup.show()
+                }
+                break
+            }
+        }
+    }
+
 
 }

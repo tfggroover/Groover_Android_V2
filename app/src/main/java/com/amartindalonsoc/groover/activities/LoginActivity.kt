@@ -2,12 +2,14 @@ package com.amartindalonsoc.groover.activities
 
 import android.Manifest
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
-import android.widget.Button
+import android.view.View
 import android.widget.ImageView
+import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.amartindalonsoc.groover.R
@@ -16,17 +18,19 @@ import com.amartindalonsoc.groover.models.SpotifyLoginCallback
 import com.amartindalonsoc.groover.utils.Constants
 import com.amartindalonsoc.groover.utils.SharedPreferencesManager
 import com.amartindalonsoc.groover.utils.Utils
+import com.github.ybq.android.spinkit.style.FadingCircle
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
-import retrofit2.Callback
 import okhttp3.Cookie
 import retrofit2.Call
+import retrofit2.Callback
 import retrofit2.Response
 import java.util.*
+
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
@@ -36,7 +40,7 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.login_activity)
+        setContentView(R.layout.activity_login)
         verifyPermissions()
         auth = Firebase.auth
 
@@ -77,7 +81,6 @@ class LoginActivity : AppCompatActivity() {
                 Log.i("newlogintest",response.body().toString())
                 if (response.isSuccessful) {
                     if (response.body() != null) {
-                        //TODO Guardar datos y mandar a getPlaces
                         SharedPreferencesManager.saveUserFromCallback(response.body()!!, loginActivity)
                         Log.i("newlogintest_saveddata", SharedPreferencesManager.getString(Constants.user_name, loginActivity)!!)
                         Log.i("newlogintest_saveddata", SharedPreferencesManager.getString(Constants.user_email, loginActivity)!!)
@@ -92,7 +95,6 @@ class LoginActivity : AppCompatActivity() {
                 Log.i("CallbackFailure", "Tried $timesTried times")
                 if (timesTried < 5) {
                     makeCall(callToMake.clone(), timesTried+1)
-                    //TODO Comprobar que esto funciona bien
                 }
             }
 
@@ -137,6 +139,29 @@ class LoginActivity : AppCompatActivity() {
                     this, PERMISSIONS,
                     REQUEST_EXTERNAL_STORAGE
                 )
+                break
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        for (i in permissions.indices) {
+            if (grantResults[i] != PackageManager.PERMISSION_GRANTED && (permissions[i] == Manifest.permission.RECORD_AUDIO || permissions[i] == Manifest.permission.ACCESS_FINE_LOCATION)) {
+                if (shouldShowRequestPermissionRationale(permissions[i])) {
+                    verifyPermissions()
+                } else {
+                    val closeAppPopup = AlertDialog.Builder(this)
+                    closeAppPopup.setTitle("Permissions required")
+                    closeAppPopup.setMessage("Location and microphone permissions are required to use the app. Enable them in Settings and restart the app.")
+                    closeAppPopup.setPositiveButton("Close"){ _, _ ->
+                        finish()
+                    }
+                    closeAppPopup.show()
+                }
                 break
             }
         }
