@@ -25,6 +25,7 @@ import com.google.firebase.ktx.Firebase
 import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
+import kotlinx.android.synthetic.main.activity_login.*
 import okhttp3.Cookie
 import retrofit2.Call
 import retrofit2.Callback
@@ -34,6 +35,7 @@ import java.util.*
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
+    private lateinit var progressSpinner: ProgressBar
     private val stateRandom = UUID.randomUUID().toString()
     private val request_code_original = 1234 // Revisar a ver si esto tiene que ir cambiando
     val loginActivity: Activity = this
@@ -43,9 +45,14 @@ class LoginActivity : AppCompatActivity() {
         setContentView(R.layout.activity_login)
         verifyPermissions()
         auth = Firebase.auth
+        progressSpinner = findViewById<ProgressBar>(R.id.spinKitLogin)
 
         val loginButton = findViewById<ImageView>(R.id.login_button)
         loginButton.setOnClickListener {
+            loginContent.visibility = View.INVISIBLE
+            spinnerOverlay.visibility = View.VISIBLE
+            val fadingCircle = FadingCircle()
+            progressSpinner.indeterminateDrawable = fadingCircle
             val builder = AuthorizationRequest.Builder(getString(R.string.client_id), AuthorizationResponse.Type.CODE, getString(R.string.redirectUri))
             builder.setScopes(arrayOf("app-remote-control", "user-read-email", "user-read-recently-played", "playlist-read-private", "streaming", "user-read-private","user-modify-playback-state","user-top-read"))
             builder.setState(stateRandom)
@@ -95,6 +102,9 @@ class LoginActivity : AppCompatActivity() {
                 Log.i("CallbackFailure", "Tried $timesTried times")
                 if (timesTried < 5) {
                     makeCall(callToMake.clone(), timesTried+1)
+                } else {
+                    loginContent.visibility = View.VISIBLE
+                    spinnerOverlay.visibility = View.INVISIBLE
                 }
             }
 
@@ -109,14 +119,19 @@ class LoginActivity : AppCompatActivity() {
                         if (task.result != null && task.result!!.token != null) {
                             Log.i("BEARER", "_" + task.result!!.token!!)
                             SharedPreferencesManager.saveFirebaseBearer(task.result!!.token!!, this)
+                            progressSpinner.visibility = View.INVISIBLE
                             Utils.startMainActivity(loginActivity)
                         }
                     } else {
                         Log.i("BEARER", it.result.toString())
+                        loginContent.visibility = View.VISIBLE
+                        spinnerOverlay.visibility = View.INVISIBLE
                     }
                 }
             } else {
                 Log.i("BEARER", it.result.toString())
+                loginContent.visibility = View.VISIBLE
+                spinnerOverlay.visibility = View.INVISIBLE
             }
         }
     }
