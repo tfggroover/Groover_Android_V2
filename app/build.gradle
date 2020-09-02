@@ -69,6 +69,7 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
     implementation files('libs/acrcloud-universal-sdk-1.2.30.jar')
     implementation 'com.github.ybq:Android-SpinKit:1.4.0'
+    implementation 'com.akexorcist:round-corner-progress-bar:2.1.1'
 }
 
 apply plugin: 'com.google.gms.google-services'

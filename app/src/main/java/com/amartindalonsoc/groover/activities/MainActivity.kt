@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import com.akexorcist.roundcornerprogressbar.indeterminate.IndeterminateCenteredRoundCornerProgressBar
 import com.amartindalonsoc.groover.R
 import com.amartindalonsoc.groover.api.Api
 import com.amartindalonsoc.groover.models.ItemForRecommendation
@@ -31,17 +32,21 @@ class MainActivity : AppCompatActivity() {
     lateinit var centerCoords: LatLng
     lateinit var userToken: String
     lateinit var spotifyAppRemote: SpotifyAppRemote
+    lateinit var progressBar: IndeterminateCenteredRoundCornerProgressBar
     var itemForRecommendation: ItemForRecommendation? = null
+    var lastItemtemForRecommendationUsed: ItemForRecommendation? = null
     var selectedItem = -1
     var distance: Double = 100.0
     var zoom: Float = 13.25f
     var spotifyAccountType = ""
+    var showRecommended = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        progressBar = findViewById(R.id.progressBar)
 
-        getPlaces()
+        getInitialPlaces()
 
         userToken = SharedPreferencesManager.getString(Constants.spotify_user_token, this)!!
         spotifyAccountType = SharedPreferencesManager.getString(Constants.spotify_account_type, this)!!
@@ -98,7 +103,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    fun getPlaces() {
+    fun getInitialPlaces() {
         val currentLocation = getLocation()
         centerCoords = currentLocation
 //        SharedPreferencesManager.saveCameraLocation(currentLocation, this)
