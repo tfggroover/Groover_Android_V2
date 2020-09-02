@@ -9,7 +9,7 @@ data class Place (
     val location: Location,
     val mainPlaylist: MainPlaylist?,
     val weeklyPlaylists: WeeklyPlaylists?,
-    val ratings: List<Rating>,
+    val ratings: Double,
     val owners: List<User>,
     val phone: String?,
     val geohash: String,

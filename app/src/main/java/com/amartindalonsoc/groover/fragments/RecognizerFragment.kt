@@ -246,13 +246,13 @@ class RecognizerFragment: Fragment(), IACRCloudListener {
             val recognizedSongToSend = RecognizedSongForBack(id, name, artists)
             val currentLocation = getLocation()
             val request = Api.azureApiRequest()
-            val call = request.getPlaces(currentLocation.latitude,currentLocation.longitude,50.0,1,25)
+            val firebaseBearer = SharedPreferencesManager.getFirebaseBearer(recognizedFragmentContext)
+            val call = request.getPlaces(currentLocation.latitude,currentLocation.longitude,50.0,1,25, ("Bearer " + firebaseBearer))
             call.enqueue(object : Callback<List<Place>> {
 
                 override fun onResponse(call: Call<List<Place>>, response: Response<List<Place>>) {
                     if (response.isSuccessful) {
                         if (response.body() != null && response.body()!!.isNotEmpty()) {
-                            val firebaseBearer = SharedPreferencesManager.getFirebaseBearer(recognizedFragmentContext)
                             Log.i("BEARER", firebaseBearer)
                             request.addRecognizedSong(response.body()!!.first().id, ("Bearer " + firebaseBearer),recognizedSongToSend).enqueue(object: Callback<Any> {
                                 override fun onFailure(call: Call<Any>, t: Throwable) {

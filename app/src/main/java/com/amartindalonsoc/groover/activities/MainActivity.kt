@@ -40,6 +40,7 @@ class MainActivity : AppCompatActivity() {
     var zoom: Float = 13.25f
     var spotifyAccountType = ""
     var showRecommended = false
+    var searchInProgress = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,7 +61,7 @@ class MainActivity : AppCompatActivity() {
             }
 
         })
-
+        // Si se vuelve a dar el pete de buscar recomendacion y navegar, mirar commitNow()
         navigation.setOnNavigationItemSelectedListener {
             val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
             when (it.itemId) {
@@ -110,7 +111,8 @@ class MainActivity : AppCompatActivity() {
 //        SharedPreferencesManager.saveMapZoom(13.25f, this)
 
         val request = Api.azureApiRequest()
-        val call = request.getPlaces(currentLocation.latitude,currentLocation.longitude,4882.0,1,25)
+        val firebaseBearer = SharedPreferencesManager.getFirebaseBearer(this)
+        val call = request.getPlaces(currentLocation.latitude,currentLocation.longitude,4882.0,1,25, ("Bearer " + firebaseBearer))
         call.enqueue(object : Callback<List<Place>> {
 
             override fun onResponse(call: Call<List<Place>>, response: Response<List<Place>>) {

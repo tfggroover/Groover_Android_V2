@@ -14,17 +14,17 @@ interface Endpoints {
     fun refreshLogin(@Query("refresh_token") refresh_token: String): Call<SpotifyRefresh>
 
     @GET("/api/place")
-    fun getPlaces(@Query("lat") lat: Double, @Query("lon") lon: Double, @Query("distance") distance: Double, @Query("page") page: Int, @Query("pageSize") pageSize: Int): Call<List<Place>>
+    fun getPlaces(@Query("lat") lat: Double, @Query("lon") lon: Double, @Query("distance") distance: Double, @Query("page") page: Int, @Query("pageSize") pageSize: Int, @Header("Authorization") token: String): Call<List<Place>>
 
     @Headers("accept: */*", "Content-type: application/json")
     @POST("/api/place/{establishmentId}/song")
     fun addRecognizedSong(@Path("establishmentId") establishmentId: String, @Header("Authorization") token: String, @Body song: RecognizerFragment.RecognizedSongForBack): Call<Any>
 
     @GET("/api/place/recommended")
-    fun getRecommendation(@Query("playlistId") playlistId: String, @Query("lat") lat: Double, @Query("lon") lon: Double, @Query("distance") distance: Double, @Query("spoToken") token: String, @Query("page") page: Int, @Query("pageSize") pageSize: Int): Call<List<Place>>
+    fun getRecommendation(@Query("playlistId") playlistId: String, @Query("lat") lat: Double, @Query("lon") lon: Double, @Query("distance") distance: Double, @Query("spoToken") spoToken: String, @Query("page") page: Int, @Query("pageSize") pageSize: Int, @Header("Authorization") token: String): Call<List<Place>>
 
     @GET("/api/place/recommended/top")
-    fun getRecommendationTop(@Query("lat") lat: Double, @Query("lon") lon: Double, @Query("distance") distance: Double, @Query("spoToken") token: String, @Query("page") page: Int, @Query("pageSize") pageSize: Int): Call<List<Place>>
+    fun getRecommendationTop(@Query("lat") lat: Double, @Query("lon") lon: Double, @Query("distance") distance: Double, @Query("spoToken") spoToken: String, @Query("page") page: Int, @Query("pageSize") pageSize: Int, @Header("Authorization") token: String): Call<List<Place>>
 
 
 

@@ -24,19 +24,19 @@ import com.amartindalonsoc.groover.models.Place
 import com.amartindalonsoc.groover.models.Song
 import com.amartindalonsoc.groover.utils.MainPlaylistAdapter
 import com.amartindalonsoc.groover.utils.RecognizedSongsAdapter
+import com.amartindalonsoc.groover.utils.SharedPreferencesManager
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.maps.android.ui.BubbleIconFactory
 import com.google.maps.android.ui.IconGenerator
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.bottom_sheet.*
 import kotlinx.android.synthetic.main.bottom_sheet.view.*
 import kotlinx.android.synthetic.main.fragment_map.*
-import kotlinx.android.synthetic.main.marker_icon.view.*
+import kotlinx.android.synthetic.main.marker_icon_recommended.view.*
 import kotlinx.android.synthetic.main.playlist_fragment.*
 import kotlinx.android.synthetic.main.recognized_fragment.*
 import retrofit2.Call
@@ -63,7 +63,7 @@ class MapFragment: Fragment(), OnMapReadyCallback {
     var distance = 4900.0
     var mapMoved = false
     var expanded = false
-//    /** Keeps track of the selected marker. It will be set to null if no marker is selected. */
+//    /** Keeps track of the selected marker_recommended. It will be set to null if no marker_recommended is selected. */
     private var selectedMarker: Marker? = null
 //
     override fun onCreateView(
@@ -85,14 +85,7 @@ class MapFragment: Fragment(), OnMapReadyCallback {
         viewpager_main.isNestedScrollingEnabled = true
         tabs_main.setupWithViewPager(viewpager_main)
 
-        if (mainActivity.itemForRecommendation != null) {
-            if (mainActivity.itemForRecommendation!!.isPlaylist) {
-                recommendAreaButton.text = "Recommend places in the area based in \n \"" + mainActivity.itemForRecommendation!!.playlist!!.name + "\""
-            } else {
-                recommendAreaButton.text = "Recommend places in the area based in \n your Top 50 tracks from Spotify"
-            }
-            recommendAreaButton.visibility = Button.VISIBLE
-        }
+        setRecommendAreaButton()
 
          val mapFragment = childFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment
          mapFragment?.getMapAsync(this)
@@ -100,11 +93,30 @@ class MapFragment: Fragment(), OnMapReadyCallback {
         sheetBehavior = BottomSheetBehavior.from<LinearLayout>(bottom_sheet)
         sheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
     }
+
+    fun setRecommendAreaButton() {
+        if (mainActivity.itemForRecommendation != null) {
+            if (mainActivity.searchInProgress) {
+                mainActivity.findViewById<Button>(R.id.recommendAreaButton).isEnabled = false
+//                recommendAreaButton.isEnabled = false
+                mainActivity.findViewById<Button>(R.id.recommendAreaButton).text = "Searching based in \n \"" + mainActivity.lastItemtemForRecommendationUsed!!.playlist!!.name + "\""
+            } else {
+                if (mainActivity.itemForRecommendation!!.isPlaylist) {
+                    mainActivity.findViewById<Button>(R.id.recommendAreaButton).isEnabled = true
+                    mainActivity.findViewById<Button>(R.id.recommendAreaButton).text = "Recommend places in the area based in \n \"" + mainActivity.itemForRecommendation!!.playlist!!.name + "\""
+                } else {
+                    mainActivity.findViewById<Button>(R.id.recommendAreaButton).isEnabled = true
+                    mainActivity.findViewById<Button>(R.id.recommendAreaButton).text = "Recommend places in the area based in \n your Top 50 tracks from Spotify"
+                }
+            }
+            mainActivity.findViewById<Button>(R.id.recommendAreaButton).visibility = Button.VISIBLE
+        }
+    }
 //
 //
 //
 //    /**
-//     * If user tapped on the the marker which was already showing info window,
+//     * If user tapped on the the marker_recommended which was already showing info window,
 //     * the showing info window will be closed. Otherwise will show a different window.
 //     */
     @SuppressLint("MissingPermission") // Permission check inside verifyPermissions()
@@ -142,6 +154,7 @@ class MapFragment: Fragment(), OnMapReadyCallback {
         }
 
         searchAreaButton.setOnClickListener {
+            mainActivity.progressBar.visibility = View.VISIBLE
             getPlaces()
         }
 
@@ -176,7 +189,7 @@ class MapFragment: Fragment(), OnMapReadyCallback {
 //            SharedPreferencesManager.saveFloat(Constants.map_distance_to_corner, distance.toFloat(), mapFragmentContext)
 //            SharedPreferencesManager.saveMapZoom(mMap.cameraPosition.zoom, mapFragmentContext)
 //            SharedPreferencesManager.saveCameraLocation(centerCoords, mapFragmentContext)
-            if (mapMoved) { searchAreaButton.visibility = Button.VISIBLE }
+//            if (mapMoved) { searchAreaButton.visibility = Button.VISIBLE }
         }
     }
 
@@ -185,7 +198,7 @@ class MapFragment: Fragment(), OnMapReadyCallback {
             if (marker == selectedMarker) {
                 // Return true to indicate we have consumed the event and that we do not
                 // want the the default behavior to occur (which is for the camera to move
-                // such that the marker is centered and for the marker's info window to open,
+                // such that the marker_recommended is centered and for the marker_recommended's info window to open,
                 // if it has one).
 
                 //selectedMarker = null
@@ -287,7 +300,8 @@ class MapFragment: Fragment(), OnMapReadyCallback {
 
     fun getPlaces() {
         val request = Api.azureApiRequest()
-        val call = request.getPlaces(centerCoords.latitude,centerCoords.longitude,distance,1,25)
+        val firebaseBearer = SharedPreferencesManager.getFirebaseBearer(mapFragmentContext)
+        val call = request.getPlaces(centerCoords.latitude,centerCoords.longitude,distance,1,25, ("Bearer " + firebaseBearer))
         call.enqueue(object : Callback<List<Place>> {
 
             override fun onResponse(call: Call<List<Place>>, response: Response<List<Place>>) {
@@ -297,9 +311,9 @@ class MapFragment: Fragment(), OnMapReadyCallback {
                     if (response.body() != null) {
                         mainActivity.placesList = response.body()!!
                         mainActivity.showRecommended = false
+                        mainActivity.progressBar.visibility = View.INVISIBLE
                         if (mainActivity.supportFragmentManager.findFragmentById(R.id.fragment_container) is MapFragment) {
                             showPlaces()
-//                            searchAreaButton.visibility = Button.INVISIBLE
                         }
                     }
                 }
@@ -313,10 +327,13 @@ class MapFragment: Fragment(), OnMapReadyCallback {
     }
 
     fun getRecommendedPlacesById(playlistForRecommendationId: String) {
+        mainActivity.searchInProgress = true
         mainActivity.lastItemtemForRecommendationUsed = mainActivity.itemForRecommendation
+        setRecommendAreaButton()
         val userToken = mainActivity.userToken
         val request = Api.azureApiRequest()
-        val call = request.getRecommendation(playlistForRecommendationId, centerCoords.latitude, centerCoords.longitude,distance, (/*"Bearer " + */userToken),1,25)
+        val firebaseBearer = SharedPreferencesManager.getFirebaseBearer(mapFragmentContext)
+        val call = request.getRecommendation(playlistForRecommendationId, centerCoords.latitude, centerCoords.longitude,distance, (/*"Bearer " + */userToken),1,25, ("Bearer " + firebaseBearer))
         call.enqueue(object : Callback<List<Place>> {
 
             override fun onResponse(call: Call<List<Place>>, response: Response<List<Place>>) {
@@ -326,9 +343,13 @@ class MapFragment: Fragment(), OnMapReadyCallback {
                     if (response.body() != null) {
                         mainActivity.recommendedPlacesList = response.body()!!
                         mainActivity.showRecommended = true
-                        if (mainActivity.supportFragmentManager.findFragmentById(R.id.fragment_container) is MapFragment) {
-                            showRecommendedPlaces()
-//                        searchAreaButton.visibility = Button.INVISIBLE
+                        mainActivity.searchInProgress = false
+                        mainActivity.progressBar.visibility = View.INVISIBLE
+                        if (mainActivity.supportFragmentManager.findFragmentById(R.id.fragment_container) is MapFragment) { // TODO Mirar de controlar mejor la recarga completa del MapFragment
+                            Log.i("mapreload", "entra")
+                            mainActivity.supportFragmentManager.beginTransaction().replace(R.id.fragment_container, MapFragment()).commit()
+//                            setRecommendAreaButton()
+//                            showRecommendedPlaces()
                         }
                     }
                 }
@@ -342,10 +363,13 @@ class MapFragment: Fragment(), OnMapReadyCallback {
     }
 
     fun getRecommendedPlacesByTop() {
+        mainActivity.searchInProgress = true
         mainActivity.lastItemtemForRecommendationUsed = mainActivity.itemForRecommendation
+        setRecommendAreaButton()
         val userToken = mainActivity.userToken
         val request = Api.azureApiRequest()
-        val call = request.getRecommendationTop(centerCoords.latitude, centerCoords.longitude,distance, (/*"Bearer " + */userToken),1,25)
+        val firebaseBearer = SharedPreferencesManager.getFirebaseBearer(mapFragmentContext)
+        val call = request.getRecommendationTop(centerCoords.latitude, centerCoords.longitude,distance, (/*"Bearer " + */userToken),1,25, ("Bearer " + firebaseBearer))
         call.enqueue(object : Callback<List<Place>> {
 
             override fun onResponse(call: Call<List<Place>>, response: Response<List<Place>>) {
@@ -355,7 +379,10 @@ class MapFragment: Fragment(), OnMapReadyCallback {
                     if (response.body() != null) {
                         mainActivity.recommendedPlacesList = response.body()!!
                         mainActivity.showRecommended = true
+                        mainActivity.searchInProgress = false
+                        mainActivity.progressBar.visibility = View.INVISIBLE
                         if (mainActivity.supportFragmentManager.findFragmentById(R.id.fragment_container) is MapFragment) {
+                            setRecommendAreaButton()
                             showRecommendedPlaces()
 //                        searchAreaButton.visibility = Button.INVISIBLE
                         }
@@ -372,7 +399,6 @@ class MapFragment: Fragment(), OnMapReadyCallback {
 
     fun showRecommendedPlaces() {
         mMap.clear()
-        mainActivity.progressBar.visibility = View.INVISIBLE
         val places = mainActivity.recommendedPlacesList
         places.sortedWith(compareBy(nullsLast<Double>()) {it.similitude})
         var counter = 1
@@ -386,7 +412,7 @@ class MapFragment: Fragment(), OnMapReadyCallback {
                     title = (place.similitude * 100).toInt().toString() + "%"
                 }
                 val iconGenerator = IconGenerator(mapFragmentContext)
-                val view: View = LayoutInflater.from(mapFragmentContext).inflate(R.layout.marker_icon, null)
+                val view: View = LayoutInflater.from(mapFragmentContext).inflate(R.layout.marker_icon_recommended, null)
                 view.marker_text.text = title
                 iconGenerator.setColor(R.color.transparent)
                 iconGenerator.setBackground(ColorDrawable(mainActivity.getColor(R.color.transparent)))
@@ -406,7 +432,7 @@ class MapFragment: Fragment(), OnMapReadyCallback {
         mMap.clear()
         for (place in mainActivity.placesList) {
             val marker = mMap.addMarker(
-                MarkerOptions().position(LatLng(place.location.latitude,place.location.longitude)).title(place.displayName)
+                MarkerOptions().position(LatLng(place.location.latitude,place.location.longitude)).title(place.displayName).icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_normal))
             )
             marker.tag = place
         }
