@@ -32,11 +32,11 @@ class ProfileFragment: Fragment() {
 
         val userName = SharedPreferencesManager.getString(Constants.user_name, profileFragmentContext)!!
         val userEmail = SharedPreferencesManager.getString(Constants.user_email, profileFragmentContext)!!
-        val userImage = SharedPreferencesManager.getString(Constants.profile_image, profileFragmentContext)!!
+        val userImage = SharedPreferencesManager.getString(Constants.profile_image, profileFragmentContext)
 
         profileName.text = userName
         profileEmail.text = userEmail
-        if(userImage != ""){
+        if(userImage != null && userImage != ""){
             Picasso.get().load(userImage).into(profileImage)
         }else{
             profileImage.setBackgroundResource(R.drawable.ic_profile_dark_foreground)
