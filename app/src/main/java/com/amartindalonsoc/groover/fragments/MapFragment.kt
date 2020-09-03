@@ -23,6 +23,7 @@ import com.amartindalonsoc.groover.fragments.PlaylistTypeInPlacePagerAdapter
 import com.amartindalonsoc.groover.models.Place
 import com.amartindalonsoc.groover.models.Song
 import com.amartindalonsoc.groover.utils.MainPlaylistAdapter
+import com.amartindalonsoc.groover.utils.PlacesListAdapter
 import com.amartindalonsoc.groover.utils.RecognizedSongsAdapter
 import com.amartindalonsoc.groover.utils.SharedPreferencesManager
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -33,10 +34,12 @@ import com.google.android.gms.maps.model.*
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.maps.android.ui.IconGenerator
 import com.squareup.picasso.Picasso
+import kotlinx.android.synthetic.main.activity_map.*
 import kotlinx.android.synthetic.main.bottom_sheet.*
 import kotlinx.android.synthetic.main.bottom_sheet.view.*
 import kotlinx.android.synthetic.main.fragment_map.*
 import kotlinx.android.synthetic.main.marker_icon_recommended.view.*
+import kotlinx.android.synthetic.main.places_list.*
 import kotlinx.android.synthetic.main.playlist_fragment.*
 import kotlinx.android.synthetic.main.recognized_fragment.*
 import retrofit2.Call
@@ -50,16 +53,20 @@ import kotlin.math.sqrt
 
 class MapFragment: Fragment(), OnMapReadyCallback {
 
-    private lateinit var mMap: GoogleMap
+    lateinit var mMap: GoogleMap
     private lateinit var sheetBehavior : BottomSheetBehavior<LinearLayout>
+    private lateinit var placesListSheetBehavior : BottomSheetBehavior<LinearLayout>
     private lateinit var mainPlaylistLinearLayoutManager: LinearLayoutManager
     private lateinit var mainPlaylistAdapter: MainPlaylistAdapter
     private lateinit var recognizedSongsLinearLayoutManager: LinearLayoutManager
     private lateinit var recognizedSongsAdapter: RecognizedSongsAdapter
+    private lateinit var placesListLinearLayoutManager: LinearLayoutManager
+    private lateinit var placesListAdapter: PlacesListAdapter
     private lateinit var mainActivity: MainActivity
 
     lateinit var mapFragmentContext: Context
     lateinit var centerCoords: LatLng
+    var markersMap = mutableMapOf<String,Marker>()
     var distance = 4900.0
     var mapMoved = false
     var expanded = false
@@ -92,6 +99,9 @@ class MapFragment: Fragment(), OnMapReadyCallback {
 
         sheetBehavior = BottomSheetBehavior.from<LinearLayout>(bottom_sheet)
         sheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+
+        placesListSheetBehavior = BottomSheetBehavior.from(places_list)
+        placesListSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
     }
 
     fun setRecommendAreaButton() {
@@ -143,6 +153,7 @@ class MapFragment: Fragment(), OnMapReadyCallback {
         mMap.setOnMapClickListener {
             selectedMarker = null
             sheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+            placesListSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
         }
         mMap.setOnCameraIdleListener(camerChangeListener)
         mMap.setOnCameraMoveListener {
@@ -171,11 +182,22 @@ class MapFragment: Fragment(), OnMapReadyCallback {
             }
         }
 
+        showPlacesList.setOnClickListener {
+            if (mainActivity.showRecommended) {
+                placesListAdapter = PlacesListAdapter(mainActivity.recommendedPlacesList, this, mainActivity)
+            } else {
+                placesListAdapter = PlacesListAdapter(mainActivity.placesList,this, mainActivity)
+            }
+            places_list_recycler_view.adapter = placesListAdapter
+            placesListSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        }
 
         mainPlaylistLinearLayoutManager = LinearLayoutManager(mapFragmentContext)
         main_playlist_recycler_view.layoutManager = mainPlaylistLinearLayoutManager
         recognizedSongsLinearLayoutManager = LinearLayoutManager(mapFragmentContext)
         recognized_songs_recycler_view.layoutManager = recognizedSongsLinearLayoutManager
+        placesListLinearLayoutManager = LinearLayoutManager(mapFragmentContext)
+        places_list_recycler_view.layoutManager = placesListLinearLayoutManager
     }
 
     private val camerChangeListener = object: GoogleMap.OnCameraIdleListener {
@@ -382,8 +404,9 @@ class MapFragment: Fragment(), OnMapReadyCallback {
                         mainActivity.searchInProgress = false
                         mainActivity.progressBar.visibility = View.INVISIBLE
                         if (mainActivity.supportFragmentManager.findFragmentById(R.id.fragment_container) is MapFragment) {
-                            setRecommendAreaButton()
-                            showRecommendedPlaces()
+                            mainActivity.supportFragmentManager.beginTransaction().replace(R.id.fragment_container, MapFragment()).commit()
+//                            setRecommendAreaButton()
+//                            showRecommendedPlaces()
 //                        searchAreaButton.visibility = Button.INVISIBLE
                         }
                     }
@@ -434,6 +457,7 @@ class MapFragment: Fragment(), OnMapReadyCallback {
             val marker = mMap.addMarker(
                 MarkerOptions().position(LatLng(place.location.latitude,place.location.longitude)).title(place.displayName).icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_normal))
             )
+            markersMap[place.id] = marker
             marker.tag = place
         }
     }
