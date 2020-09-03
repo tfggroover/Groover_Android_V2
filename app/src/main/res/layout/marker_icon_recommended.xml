@@ -12,7 +12,7 @@
         android:id="@+id/marker_image"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/marker_recommended"
+        android:src="@drawable/marker_yellow"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         />

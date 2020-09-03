@@ -63,7 +63,7 @@ class MapFragment: Fragment(), OnMapReadyCallback {
     var distance = 4900.0
     var mapMoved = false
     var expanded = false
-//    /** Keeps track of the selected marker_recommended. It will be set to null if no marker_recommended is selected. */
+//    /** Keeps track of the selected marker_green. It will be set to null if no marker_green is selected. */
     private var selectedMarker: Marker? = null
 //
     override fun onCreateView(
@@ -116,7 +116,7 @@ class MapFragment: Fragment(), OnMapReadyCallback {
 //
 //
 //    /**
-//     * If user tapped on the the marker_recommended which was already showing info window,
+//     * If user tapped on the the marker_green which was already showing info window,
 //     * the showing info window will be closed. Otherwise will show a different window.
 //     */
     @SuppressLint("MissingPermission") // Permission check inside verifyPermissions()
@@ -198,7 +198,7 @@ class MapFragment: Fragment(), OnMapReadyCallback {
             if (marker == selectedMarker) {
                 // Return true to indicate we have consumed the event and that we do not
                 // want the the default behavior to occur (which is for the camera to move
-                // such that the marker_recommended is centered and for the marker_recommended's info window to open,
+                // such that the marker_green is centered and for the marker_green's info window to open,
                 // if it has one).
 
                 //selectedMarker = null
@@ -414,6 +414,11 @@ class MapFragment: Fragment(), OnMapReadyCallback {
                 val iconGenerator = IconGenerator(mapFragmentContext)
                 val view: View = LayoutInflater.from(mapFragmentContext).inflate(R.layout.marker_icon_recommended, null)
                 view.marker_text.text = title
+                when  {
+                    place.similitude >= 0.6 -> view.marker_image.setImageResource(R.drawable.marker_green)
+                    place.similitude in 0.3..0.6 -> view.marker_image.setImageResource(R.drawable.marker_yellow)
+                    place.similitude < 0.3 -> view.marker_image.setImageResource(R.drawable.marker_red)
+                }
                 iconGenerator.setColor(R.color.transparent)
                 iconGenerator.setBackground(ColorDrawable(mainActivity.getColor(R.color.transparent)))
                 iconGenerator.setContentView(view)
