@@ -167,9 +167,9 @@ class MainActivity : AppCompatActivity() {
 
         if(locationGps!= null){
             return LatLng(locationGps!!.latitude,locationGps!!.longitude)
+        } else {
+            return LatLng(37.381640, -5.978919) // Sevilla
         }
-
-        return LatLng(0.0,0.0)
     }
 
     override fun onBackPressed() {
