@@ -9,7 +9,7 @@ data class SpotifyLoginCallback (
 )
 
 data class SpotifyLogin (
-    @SerializedName("refresh_token")
+    @SerializedName("refresh_Token")
     val refreshToken: String,
     @SerializedName("access_token")
     val accessToken: String,
