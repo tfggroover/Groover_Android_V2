@@ -97,9 +97,13 @@ class MapFragment: Fragment(), OnMapReadyCallback {
     fun setRecommendAreaButton() {
         if (mainActivity.itemForRecommendation != null) {
             if (mainActivity.searchInProgress) {
-                mainActivity.findViewById<Button>(R.id.recommendAreaButton).isEnabled = false
-//                recommendAreaButton.isEnabled = false
-                mainActivity.findViewById<Button>(R.id.recommendAreaButton).text = "Searching based in \n \"" + mainActivity.lastItemtemForRecommendationUsed!!.playlist!!.name + "\""
+                if (mainActivity.itemForRecommendation!!.isPlaylist) {
+                    mainActivity.findViewById<Button>(R.id.recommendAreaButton).isEnabled = false
+                    mainActivity.findViewById<Button>(R.id.recommendAreaButton).text = "Searching based in \n \"" + mainActivity.lastItemtemForRecommendationUsed!!.playlist!!.name + "\""
+                } else {
+                    mainActivity.findViewById<Button>(R.id.recommendAreaButton).isEnabled = false
+                    mainActivity.findViewById<Button>(R.id.recommendAreaButton).text = "Searching based in \n your Top 50 tracks from Spotify"
+                }
             } else {
                 if (mainActivity.itemForRecommendation!!.isPlaylist) {
                     mainActivity.findViewById<Button>(R.id.recommendAreaButton).isEnabled = true
